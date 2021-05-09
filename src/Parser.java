@@ -24,7 +24,7 @@ public class Parser {
 			scan.useDelimiter("\\s+|(?=[{}(),;])|(?<=[{}(),;])");
 
 			RobotProgramNode n = parseProgram(scan); // You need to implement this!!!
-
+//TODO implement parseProgram(scan) in RobotProgramNode
 			scan.close();
 			return n;
 		} catch (FileNotFoundException e) {
@@ -87,7 +87,7 @@ public class Parser {
 	 */
 	static RobotProgramNode parseProgram(Scanner s) {
 		// THE PARSER GOES HERE
-
+//TODO this is the parser I will write
 		return null;
 	}
 
@@ -172,3 +172,4 @@ public class Parser {
 }
 
 // You could add the node classes here, as long as they are not declared public (or private)
+//TODO add node classes here
