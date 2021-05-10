@@ -77,15 +77,37 @@ public class Parser {
 	// Useful Patterns
 
 	private static final Pattern NUMPAT = Pattern.compile("-?\\d+"); // ("-?(0|[1-9][0-9]*)");
+
 	private static final  Pattern OPENPAREN = Pattern.compile("\\(");
 	private static final  Pattern CLOSEPAREN = Pattern.compile("\\)");
 	private static final  Pattern OPENBRACE = Pattern.compile("\\{");
 	private static final  Pattern CLOSEBRACE = Pattern.compile("\\}");
+// Operator patterns
 	private static final  Pattern ADDPAT = Pattern.compile("\\+");
 	private static final  Pattern SUBPAT = Pattern.compile("-");
 	private static final  Pattern MULPAT = Pattern.compile("\\*");
 	private static final  Pattern DIVPAT = Pattern.compile("/");
+// Robot action patterns
+	private static final  Pattern TURN_L = Pattern.compile("turnL");
+	private static final  Pattern MOVE = Pattern.compile("move");
+	private static final  Pattern TURN_R = Pattern.compile("turnR");
+	private static final  Pattern TURN_AR = Pattern.compile("turnAround");
 
+	private static final  Pattern TAKEFUEL = Pattern.compile("takeFuel");
+	private static final  Pattern FUEL = Pattern.compile("fuel");
+
+	private static final  Pattern OPP_LR = Pattern.compile("oppLR");
+	private static final  Pattern OPP_FB = Pattern.compile("oppFB");
+	private static final  Pattern SHIELD = Pattern.compile("shield");
+	private static final  Pattern BARRELS = Pattern.compile("numBarrels");
+	private static final  Pattern CLOSE_BARRELS = Pattern.compile("closestBarrelLR");
+
+	private static final  Pattern LOOP = Pattern.compile("loop");
+	private static final  Pattern WAIT = Pattern.compile("wait");
+	private static final  Pattern WHILE_PAT = Pattern.compile("while");
+	private static final  Pattern IF_PAT = Pattern.compile("if");
+
+// TODO up to here
 //	Pattern numPat = Pattern.compile( "[-+]?(\\d+([.]\\d*)?|[.]\\d+)");
 //	Pattern addPat = Pattern.compile("add");
 //	Pattern subPat = Pattern.compile("sub");
