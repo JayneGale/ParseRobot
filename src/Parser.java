@@ -76,12 +76,35 @@ public class Parser {
 
 	// Useful Patterns
 
-	static Pattern NUMPAT = Pattern.compile("-?\\d+"); // ("-?(0|[1-9][0-9]*)");
-	static Pattern OPENPAREN = Pattern.compile("\\(");
-	static Pattern CLOSEPAREN = Pattern.compile("\\)");
-	static Pattern OPENBRACE = Pattern.compile("\\{");
-	static Pattern CLOSEBRACE = Pattern.compile("\\}");
+	private static final Pattern NUMPAT = Pattern.compile("-?\\d+"); // ("-?(0|[1-9][0-9]*)");
+	private static final  Pattern OPENPAREN = Pattern.compile("\\(");
+	private static final  Pattern CLOSEPAREN = Pattern.compile("\\)");
+	private static final  Pattern OPENBRACE = Pattern.compile("\\{");
+	private static final  Pattern CLOSEBRACE = Pattern.compile("\\}");
+	private static final  Pattern ADDPAT = Pattern.compile("\\+");
+	private static final  Pattern SUBPAT = Pattern.compile("-");
+	private static final  Pattern MULPAT = Pattern.compile("\\*");
+	private static final  Pattern DIVPAT = Pattern.compile("/");
 
+//	Pattern numPat = Pattern.compile( "[-+]?(\\d+([.]\\d*)?|[.]\\d+)");
+//	Pattern addPat = Pattern.compile("add");
+//	Pattern subPat = Pattern.compile("sub");
+//	Pattern mulPat = Pattern.compile("mul");
+//	Pattern divPat = Pattern.compile("div");
+//	Pattern opPat = Pattern.compile("add|sub|mul|div");
+//	Pattern openPat = Pattern.compile("\\(");
+//	Pattern commaPat = Pattern.compile(",");
+//	Pattern closePat = Pattern.compile("\\)");
+//public Node parseExpr(Scanner s) {
+//	Node n;
+//	if (!s.hasNext()) { return false; }
+//	if (s.hasNext(numPat)) { return parseNumber(s); }
+//	if (s.hasNext(addPat)) { return parseAdd(s); }
+//	if (s.hasNext(subPat)) { return parseSub(s); }
+//	if (s.hasNext(mulPat)) { return parseMul(s); }
+//	if (s.hasNext(divPat)) { return parseDiv(s); }
+//	return false;
+//}
 	/**
 	 * PROG ::= STMT+
 	 */
