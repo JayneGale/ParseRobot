@@ -95,19 +95,24 @@ public class Parser {
 
 	private static final  Pattern TAKEFUEL = Pattern.compile("takeFuel");
 	private static final  Pattern FUEL = Pattern.compile("fuel");
+	private static final  Pattern FUELLEFT = Pattern.compile("fuelLeft");
 
 	private static final  Pattern OPP_LR = Pattern.compile("oppLR");
 	private static final  Pattern OPP_FB = Pattern.compile("oppFB");
-	private static final  Pattern SHIELD = Pattern.compile("shield");
+	private static final  Pattern SHIELDON = Pattern.compile("shieldOn");
+	private static final  Pattern SHIELDOFF = Pattern.compile("shieldOff");
 	private static final  Pattern BARRELS = Pattern.compile("numBarrels");
 	private static final  Pattern CLOSE_BARRELS = Pattern.compile("closestBarrelLR");
+	private static final  Pattern BARRELLR = Pattern.compile("barrelLR");
+
 
 	private static final  Pattern LOOP = Pattern.compile("loop");
 	private static final  Pattern WAIT = Pattern.compile("wait");
 	private static final  Pattern WHILE_PAT = Pattern.compile("while");
 	private static final  Pattern IF_PAT = Pattern.compile("if");
 
-// TODO up to here
+// TODO up to here - there may be more patterns to add
+
 //	Pattern numPat = Pattern.compile( "[-+]?(\\d+([.]\\d*)?|[.]\\d+)");
 //	Pattern addPat = Pattern.compile("add");
 //	Pattern subPat = Pattern.compile("sub");

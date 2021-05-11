@@ -90,22 +90,25 @@ class NumNode implements RobotNode {
     public int eval() { return this.value; }
 }
 
-class TermNode implements RobotNode {
-    final int value;
-    public TermNode(int v){ value = v; }
-    public String toString() { return value + ""; }
-    public int eval() { return this.value; }
-}
+// a Term is an expression so might be 3*5+2 3*5 is one term and 2 is the other term
+//class TermNode implements RobotNode {
+//    final int value;
+//    public TermNode(int v){ value = v; }
+//    public String toString() { return value + ""; }
+//    public int eval() { return this.value; }
+//}
+
 //class ExprNode implements RobotNode {
 //    final RobotNode child;
 //    public ExprNode(RobotNode c) { this.child = c; }
 //    public String toString() { return "[" + this.child + "]"; }
 //    public int eval() { return this.child.eval(); }
 //}
-//class TerminalNode implements RobotNode {
-//    final String value;
-//    public TerminalNode(String v){ value = v; }
-//    public String toString() { return value; }
-//    public int eval() { return 0; }
-//}
+
+class ActNode implements RobotNode {
+    final String value;
+    public ActNode(String v){ value = v; }
+    public String toString() { return value; }
+    public int eval() { return 0; }
+}
 
