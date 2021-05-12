@@ -11,6 +11,7 @@ import javax.swing.JFileChooser;
  */
 public class Parser {
 
+
 	/**
 	 * Top level parse method, called by the World
 	 */
@@ -89,7 +90,7 @@ public class Parser {
 	private static final  Pattern DIVPAT = Pattern.compile("/");
 // Robot action patterns
 	private static final  Pattern TURN_L = Pattern.compile("turnL");
-	private static final  Pattern MOVE = Pattern.compile("move");
+	private static final  Pattern MOVEPAT = Pattern.compile("move");
 	private static final  Pattern TURN_R = Pattern.compile("turnR");
 	private static final  Pattern TURN_AR = Pattern.compile("turnAround");
 
@@ -137,9 +138,47 @@ public class Parser {
 	 */
 	static RobotProgramNode parseProgram(Scanner s) {
 		// THE PARSER GOES HERE
-//TODO this is the parser I will write
+		RobotProgramNode node = null;
+//		 scan for
+//		 a statement (loop, if, while etc),
+//		 a variable (var)
+//		 an operation (add, multiply, etc)
+//		 a term or number
+//		 an action (move turn_l etc)
+
+		RobotProgramNode moveNode = new MoveNode();
+		return moveNode;
+		}
+
+	public RobotProgramNode parseAct(Scanner s){
+		RobotProgramNode child = null;
+		if(!s.hasNext()) {fail("Empty expression", s);}
+		if (s.hasNext(MOVEPAT)){ return parseMove(s);}
+//		if (s.hasNext(TURN_L)){ return parseTurnL(s);}
+//		if (s.hasNext(TURN_R)){ return parseTurnR(s);}
+//		if (s.hasNext(TURN_AR)){ return parseTurnAround(s);}
+		fail ("unknown or missing expression", s);
+		return null;
+		}
+
+	public RobotProgramNode parseMove(Scanner s){
+		RobotProgramNode move1 = new MoveNode();
+		if(!s.hasNext()) {fail("Empty expression", s);}
+		else if (s.hasNext(";")){
+			return move1;
+		//				move the robot; which robot? ?? what do I return to actually move it?
+		// return the MoveNode?
+		}
+//		else if(s.hasNext("\\(")){
+//		// find out if the term inside the brackets is valid and evaluate it
+//		require and element and a close bracket
+//			return move2(term);
+//		}
+		else {fail("not a move node", s);
+		}
 		return null;
 	}
+
 
 	// utility methods for the parser
 
@@ -223,3 +262,112 @@ public class Parser {
 
 // You could add the node classes here, as long as they are not declared public (or private)
 //TODO add node classes here
+class MoveNode implements RobotProgramNode {
+	//	call the move method in Robot
+	public String toString(Robot robot){
+		return  "move " + robot.toString();
+	}
+	public Robot execute(Robot robot) {
+		robot.move();
+		return null;
+	}
+}
+
+class TurnLNode implements RobotProgramNode {
+	//	call the turn method in Robot
+	public String toString(Robot robot) {
+		return "turnL " + robot.toString();
+	}
+
+	public Robot execute(Robot robot) {
+		robot.turnLeft();
+		return robot;
+	}
+}
+
+class TurnRNode implements RobotProgramNode {
+	//	call the turn method in Robot
+	public String toString(Robot robot) {
+		return "turnR " + robot.toString();
+	}
+
+	public Robot execute(Robot robot) {
+		robot.turnRight();
+		return robot;
+	}
+}
+
+class LoopNode implements RobotProgramNode{
+	BlockNode  block = this.block;
+	String toString(Robot robot) {
+		return "loop " + this.block;
+	}
+	public Robot execute(Robot robot){
+		execute(block.execute(robot));
+		return null;
+	}
+}
+
+class BlockNode implements RobotProgramNode{
+	//	for now, one action, there are likely several so need an array of actNodes and a for act in Actnodes on the toString and execute methods
+	ActNode act = this.act;
+	String toString(Robot robot) {
+		return "block node " + this.act;
+	}
+	public Robot execute(Robot robot){
+		execute(act.execute(robot));
+//		call the BlockNode elements to execute actually I need a different ActNode that is a RobotProgrammeNode
+		return null;
+	}
+
+}
+class PROGNode implements RobotProgramNode{
+	//	for now, one action, there are likely several so need an array of actNodes and a for act in Actnodes on the toString and execute methods
+	STATNode st = this.st;
+	String toString(Robot robot) {
+		return "block node " + this.st;
+	}
+	public Robot execute(Robot robot){
+		execute(st.execute(robot));
+//		call the Programme elements to execute actually I need a an array or list of elements in the programme
+		return null;
+	}
+
+}
+class STATNode implements RobotProgramNode{
+	//	for now, one action, there are likely several so need an array of actNodes and a for act in Actnodes on the toString and execute methods
+
+	STATNode st = this.st;
+	String toString(Robot robot) {
+		return "block node " + this.st;
+	}
+	public Robot execute(Robot robot){
+		execute(st.execute(robot));
+//		call the Programme elements to execute actually I need a an array or list of elements in the programme
+		return null;
+	}
+}
+class ACTNode implements RobotProgramNode{
+	//	for now, one action, there are likely several so need an array of actNodes and a for act in Actnodes on the toString and execute methods
+	STATNode st = this.st;
+
+	String toString(Robot robot) {
+		return "block node " + this.st;
+	}
+	public Robot execute(Robot robot){
+		execute(st.execute(robot));
+//		call the Programme elements to execute actually I need a an array or list of elements in the programme
+		return null;
+	}
+}
+
+//		LOOP and BLOCK rules will need to construct the string out of their components.
+//	The execute method for LoopNode will not call methods on the robot directly, but will repeatedly call the execute method of the BlockNode that it contains. Similarly, the BlockNode will need to call the execute method of each of its components in turn.
+//		The node classes should also have a toString method which returns a textual representation of the node. The nodes corresponding to the PROG, STMT, LOOP and BLOCK rules will need to construct the string out of their components. For example, the LoopNode class might have the following method (assuming that block is a field containing the BlockNode that is contained in the LoopNode):
+//		1
+//public String toString() {
+//		2
+//		return "loop" + this.block;
+//		3
+//		}
+//		You will also need to create a parse... method for each of the rules, which takes the scanner, and returns a RobotProgramNod

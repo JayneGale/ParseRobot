@@ -6,34 +6,40 @@ import java.util.ArrayList;
         public String toString();
     }
 //Operation nodes
-class AddNode implements RobotNode {
-    private RobotNode left, right;
-    public AddNode(RobotNode lt, RobotNode rt) {
-        left = lt; right = rt;
-    }
-    public String toString(){
-        return  "add("+left+","+right+")";
-    }
-    public int eval() {
-        int result = 0;
-        result = left.eval() + right.eval();
-    return result;
-    }
-    }
-//    class AddNode1 implements RobotNode {
-//        final ArrayList<RobotNode> children;
-//        public AddNode(ArrayList<RobotNode> chn){
-//            children = chn; }
-//        public String toString() {
-//    //            copied from class notes
-//    //            String result = "[";
-//    //            for (RobotNode n : children){result += n.toString();}
-//    //             return result + "]";
-//    //            this is terrible code assumes we know the positions
-//            return children.get(2) + " + " + children.get(4);
-//        }
-//        }
+//class AddNode implements RobotNode {
+//    private RobotNode left, right;
+//    public AddNode(RobotNode lt, RobotNode rt) {
+//        left = lt; right = rt;
 //    }
+//    public String toString(){
+//        return  "add("+left+","+right+")";
+//    }
+//    public int eval() {
+//        int result = 0;
+//        result = left.eval() + right.eval();
+//    return result;
+//    }
+//    }
+    class AddNode implements RobotNode {
+        final ArrayList<RobotNode> children;
+        public AddNode(ArrayList<RobotNode> chn){
+            children = chn; }
+
+    @Override
+    public int eval() {
+        return 0;
+    }
+
+    public String toString() {
+    //            copied from class notes
+    //            String result = "[";
+    //            for (RobotNode n : children){result += n.toString();}
+    //             return result + "]";
+    //            this is terrible code assumes we know the positions
+            return children.get(2) + " + " + children.get(4);
+        }
+        }
+
 class SubNode implements RobotNode {
     final ArrayList<RobotNode> children;
     public SubNode(ArrayList<RobotNode> chn){
@@ -110,5 +116,10 @@ class ActNode implements RobotNode {
     public ActNode(String v){ value = v; }
     public String toString() { return value; }
     public int eval() { return 0; }
+
+    public Robot execute(Robot robot) {
+//        do these actions
+        return null;
+    }
 }
 

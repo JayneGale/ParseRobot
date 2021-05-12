@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class ParseExp {
 //    public static void main(String[] a) {
@@ -36,19 +37,37 @@ public class ParseExp {
 
     public static boolean parseOp(Scanner s) {
         if (s.hasNext("add") || s.hasNext("sub") || s.hasNext("mul") || s.hasNext("div")) {
-            s.next(); } else { return false;
+            s.next();
+        } else {
+            return false;
         }
-        if (s.hasNext("\\(")) { s.next(); } else { return false; }
-        if (!parseExp(s)) { return false; }
-        if (s.hasNext(",")) { s.next(); } else { return false; }
-        if (!parseExp(s)) { return false; }
-        if (s.hasNext("\\)")) { s.next(); } else { return false; }
+        if (s.hasNext("\\(")) {
+            s.next();
+        } else {
+            return false;
+        }
+        if (!parseExp(s)) {
+            return false;
+        }
+        if (s.hasNext(",")) {
+            s.next();
+        } else {
+            return false;
+        }
+        if (!parseExp(s)) {
+            return false;
+        }
+        if (s.hasNext("\\)")) {
+            s.next();
+        } else {
+            return false;
+        }
         return true;
     }
 
-    public static void fail(String errorMsg, Scanner s){
+    public static void fail(String errorMsg, Scanner s) {
         String msg = "Parse Error: " + errorMsg + " @... ";
-        for (int i=0; i<5 && s.hasNext(); i++)
+        for (int i = 0; i < 5 && s.hasNext(); i++)
             msg += " " + s.next();
 
         throw new RuntimeException(msg);
@@ -67,11 +86,14 @@ public class ParseExp {
 //    }
 
     public static RobotNode parseNum(Scanner s) {
-        if (!s.hasNextInt())  { fail("not an integer", s); }
+        if (!s.hasNextInt()) {
+            fail("not an integer", s);
+        }
 //        TODO up to here
         return new NumNode(s.nextInt());
     }
-//    public Node parseNum(Scanner s){
+
+    //    public Node parseNum(Scanner s){
 //        if (!s.hasNext("[-+]?\\d+")){
 //            fail("Expecting a number",s);
 //        }
@@ -99,4 +121,5 @@ public class ParseExp {
 
         return new AddNode(children);
 //    }
+    }
 }
