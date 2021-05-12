@@ -11,7 +11,6 @@ import javax.swing.JFileChooser;
  */
 public class Parser {
 
-
 	/**
 	 * Top level parse method, called by the World
 	 */
@@ -107,7 +106,7 @@ public class Parser {
 	private static final  Pattern BARRELLR = Pattern.compile("barrelLR");
 
 
-	private static final  Pattern LOOP = Pattern.compile("loop");
+	private static final  Pattern LOOP_PAT = Pattern.compile("loop");
 	private static final  Pattern WAIT = Pattern.compile("wait");
 	private static final  Pattern WHILE_PAT = Pattern.compile("while");
 	private static final  Pattern IF_PAT = Pattern.compile("if");
@@ -136,21 +135,41 @@ public class Parser {
 	/**
 	 * PROG ::= STMT+
 	 */
+
+	// THE PARSER GOES HERE
 	static RobotProgramNode parseProgram(Scanner s) {
-		// THE PARSER GOES HERE
 		RobotProgramNode node = null;
+		ArrayList<RobotProgramNode> nodeTree = new ArrayList<>();
+
 //		 scan for
 //		 a statement (loop, if, while etc),
 //		 a variable (var)
 //		 an operation (add, multiply, etc)
 //		 a term or number
 //		 an action (move turn_l etc)
-
-		RobotProgramNode moveNode = new MoveNode();
-		return moveNode;
+		if(s.hasNext(MOVEPAT) || s.hasNext(TURN_L)|| s.hasNext(TURN_R)|| s.hasNext(TURN_AR)){return parseAct(s);}
+		if(s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT)|| s.hasNext(LOOP_PAT)){return parseStatement(s);}
+		if(s.hasNext(ADDPAT) || s.hasNext(SUBPAT)){return parseTerms(s);}
+		if(s.hasNext(MULPAT) || s.hasNext(DIVPAT)){return parseNum(s);}
+		return node;
 		}
 
-	public RobotProgramNode parseAct(Scanner s){
+
+	static RobotProgramNode parseStatement (Scanner s){
+		if(!s.hasNext()) {fail("Empty expression", s);}
+		if (s.hasNext(LOOP_PAT)){ return parseLoop(s);}
+//		if (s.hasNext(TURN_L)){ return parseTurnL(s);}
+//		if (s.hasNext(TURN_R)){ return parseTurnR(s);}
+//		if (s.hasNext(TURN_AR)){ return parseTurnAround(s);}
+		fail ("unknown or missing expression", s);
+		return null;
+	}
+
+	private static RobotProgramNode parseLoop(Scanner s) {
+		return null;
+	}
+
+	static RobotProgramNode parseAct(Scanner s){
 		RobotProgramNode child = null;
 		if(!s.hasNext()) {fail("Empty expression", s);}
 		if (s.hasNext(MOVEPAT)){ return parseMove(s);}
@@ -158,16 +177,15 @@ public class Parser {
 //		if (s.hasNext(TURN_R)){ return parseTurnR(s);}
 //		if (s.hasNext(TURN_AR)){ return parseTurnAround(s);}
 		fail ("unknown or missing expression", s);
-		return null;
+		return child;
 		}
 
-	public RobotProgramNode parseMove(Scanner s){
+	public static RobotProgramNode parseMove(Scanner s){
 		RobotProgramNode move1 = new MoveNode();
 		if(!s.hasNext()) {fail("Empty expression", s);}
 		else if (s.hasNext(";")){
 			return move1;
 		//				move the robot; which robot? ?? what do I return to actually move it?
-		// return the MoveNode?
 		}
 //		else if(s.hasNext("\\(")){
 //		// find out if the term inside the brackets is valid and evaluate it
@@ -176,6 +194,13 @@ public class Parser {
 //		}
 		else {fail("not a move node", s);
 		}
+		return null;
+	}
+	private static RobotProgramNode parseNum(Scanner s) {
+		return null;
+	}
+
+	private static RobotProgramNode parseTerms(Scanner s) {
 		return null;
 	}
 
@@ -269,7 +294,7 @@ class MoveNode implements RobotProgramNode {
 	}
 	public Robot execute(Robot robot) {
 		robot.move();
-		return null;
+		return robot;
 	}
 }
 
