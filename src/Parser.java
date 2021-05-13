@@ -87,11 +87,13 @@ public class Parser {
 	private static final  Pattern SUBPAT = Pattern.compile("-");
 	private static final  Pattern MULPAT = Pattern.compile("\\*");
 	private static final  Pattern DIVPAT = Pattern.compile("/");
-// Robot action patterns
+
+	// Robot action patterns
 	private static final  Pattern TURN_L = Pattern.compile("turnL");
 	private static final  Pattern MOVEPAT = Pattern.compile("move");
 	private static final  Pattern TURN_R = Pattern.compile("turnR");
 	private static final  Pattern TURN_AR = Pattern.compile("turnAround");
+	private static final  Pattern WAIT = Pattern.compile("wait");
 
 	private static final  Pattern TAKEFUEL = Pattern.compile("takeFuel");
 	private static final  Pattern FUEL = Pattern.compile("fuel");
@@ -107,11 +109,10 @@ public class Parser {
 
 
 	private static final  Pattern LOOP_PAT = Pattern.compile("loop");
-	private static final  Pattern WAIT = Pattern.compile("wait");
 	private static final  Pattern WHILE_PAT = Pattern.compile("while");
 	private static final  Pattern IF_PAT = Pattern.compile("if");
 
-// TODO up to here - there may be more patterns to add
+// TODO there may be more patterns to add
 
 //	Pattern numPat = Pattern.compile( "[-+]?(\\d+([.]\\d*)?|[.]\\d+)");
 //	Pattern addPat = Pattern.compile("add");
@@ -140,7 +141,6 @@ public class Parser {
 	static RobotProgramNode parseProgram(Scanner s) {
 		RobotProgramNode node = null;
 		ArrayList<RobotProgramNode> nodeTree = new ArrayList<>();
-
 //		 scan for
 //		 a statement (loop, if, while etc),
 //		 a variable (var)
@@ -148,7 +148,7 @@ public class Parser {
 //		 a term or number
 //		 an action (move turn_l etc)
 		while (s.hasNext()) {
-			if (s.hasNext(MOVEPAT) || s.hasNext(TURN_L) || s.hasNext(TURN_R) || s.hasNext(TURN_AR)||s.hasNext(WAIT)) {
+			if (s.hasNext(MOVEPAT) || s.hasNext(TURN_L) || s.hasNext(TURN_R) || s.hasNext(TURN_AR)||s.hasNext(WAIT)||s.hasNext(TAKEFUEL)) {
 				nodeTree.add(parseAct(s));
 			} else if (s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)) {
 				nodeTree.add(parseStatement(s));
@@ -158,16 +158,35 @@ public class Parser {
 				nodeTree.add(parseNum(s));
 			}
 		}
+		if (nodeTree!= null){
+			for (RobotProgramNode n : nodeTree)
+			System.out.println("nodeTree " + n.toString());
+		}
 		return new PROGNode();
 	}
 
 	static RobotProgramNode parseStatement (Scanner s){
 		if(!s.hasNext()) {fail("Empty expression", s);}
-		if (s.hasNext(LOOP_PAT)){ return parseLoop(s);}
-//		if (s.hasNext(TURN_L)){ return parseTurnL(s);}
-//		if (s.hasNext(TURN_R)){ return parseTurnR(s);}
+		System.out.println("Stmt started " + s.hasNext());
+		if (s.hasNext(LOOP_PAT)){
+			s.next();
+			return parseLoop(s);}
+		if (s.hasNext(IF_PAT)){
+			s.next();
+			return parseIf(s);}
+		if (s.hasNext(WHILE_PAT)){ return parseWhile(s);}
 //		if (s.hasNext(TURN_AR)){ return parseTurnAround(s);}
 		fail ("unknown or missing expression", s);
+		return null;
+	}
+
+	private static RobotProgramNode parseWhile(Scanner s) {
+		System.out.println("reached WHILE statement " + s.hasNext());
+		return null;
+	}
+
+	private static RobotProgramNode parseIf(Scanner s) {
+		System.out.println("reached IF statement " + s.hasNext());
 		return null;
 	}
 
@@ -175,7 +194,7 @@ public class Parser {
 		if(!s.hasNext()) {fail("Empty expression on loop ", s);}
 		require(LOOP_PAT, "no loop ", s);
 		require(OPENBRACE, "no open brace on loop ", s);
-		if(s.hasNext(MOVEPAT) || s.hasNext(TURN_L) || s.hasNext(TURN_R) || s.hasNext(TURN_AR)||s.hasNext(WAIT)) {
+		if(s.hasNext(MOVEPAT) || s.hasNext(TURN_L) || s.hasNext(TURN_R) || s.hasNext(TURN_AR)||s.hasNext(WAIT)||s.hasNext(TAKEFUEL)) {
 			s.next();
 			return parseAct(s);
 		}
@@ -197,9 +216,11 @@ public class Parser {
 		if (s.hasNext(TURN_R)){ return parseTurnR(s);}
 		if (s.hasNext(TURN_AR)){ return parseTurnAR(s);}
 		if (s.hasNext(WAIT)){ return parseWait(s);}
+		if (s.hasNext(TAKEFUEL)){ return parseTakeFuel(s);}
 		fail ("unknown or missing expression ", s);
 		return prog;
 		}
+
 
 	public static RobotProgramNode parseMove(Scanner s){
 		RobotProgramNode move1 = new MoveNode();
@@ -240,6 +261,14 @@ public class Parser {
 		require(WAIT, "no wait ", s);
 		require (SEMIC, "missing semicolon after wait ", s);
 		return wait;
+	}
+	private static RobotProgramNode parseTakeFuel(Scanner s) {
+		RobotProgramNode takeFuel = new TakeFuelNode();
+		if(!s.hasNext()) {fail("Empty expression", s);}
+		require(WAIT, "no wait ", s);
+		require (SEMIC, "missing semicolon after wait ", s);
+		return takeFuel;
+
 	}
 
 
@@ -387,6 +416,17 @@ class WaitNode implements RobotProgramNode {
 	}
 	public Robot execute(Robot robot) {
 		robot.idleWait();
+		return robot;
+	}
+}
+
+class TakeFuelNode implements RobotProgramNode {
+	public String toString(Robot robot) {
+		return "takeFuel " + robot.toString();
+	}
+
+	public Robot execute(Robot robot) {
+		robot.takeFuel();
 		return robot;
 	}
 }
