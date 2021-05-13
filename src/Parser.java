@@ -138,7 +138,7 @@ public class Parser {
 	/**
 	 * PROG ::= STMT+
 	 */
-
+//TODO the pareser methods are here
 	// THE PARSER GOES HERE
 	static RobotProgramNode parseProgram(Scanner s) {
 		RobotProgramNode node = null;
@@ -196,13 +196,13 @@ public class Parser {
 		require(LOOP_PAT, "no loop ", s);
 		require(OPENBRACE, "no open brace on loop ", s);
 		if(s.hasNext(CLOSEBRACE)) {fail("nothing between the loop braces ", s);}
-		if(s.hasNext(MOVEPAT) || s.hasNext(TURN_L) || s.hasNext(TURN_R) || s.hasNext(TURN_AR)||s.hasNext(WAIT)||s.hasNext(TAKEFUEL)) {
-			return parseAct(s);
-		}
-	   if (s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)) {
-			return parseStatement(s);
+		while(s.hasNext(MOVEPAT) || s.hasNext(TURN_L) || s.hasNext(TURN_R) || s.hasNext(TURN_AR)||s.hasNext(WAIT)||s.hasNext(TAKEFUEL)) {
+			parseAct(s);
 		}
 		require(CLOSEBRACE, "no close brace on loop ", s);
+//		if (s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)) {
+//		   require(CLOSEBRACE, "no close brace on loop ", s);
+//		   return parseStatement(s);}
 		return new LoopNode();
 	}
 
@@ -246,8 +246,7 @@ public class Parser {
 	private static RobotProgramNode parseTurnR(Scanner s) {
 		RobotProgramNode turn_R = new TurnRNode();
 		if(!s.hasNext()) {fail("Empty expression", s);}
-		System.out.println("TurnR started" + s.hasNext());
-
+		System.out.println("TurnR started " + s.hasNext());
 		require(TURN_R, "no turnR ", s);
 		require (SEMIC, "missing semicolon on turn_R ", s);
 		return turn_R;
@@ -255,7 +254,7 @@ public class Parser {
 	private static RobotProgramNode parseTurnAR(Scanner s) {
 		RobotProgramNode turn_AR = new TurnARNode();
 		if(!s.hasNext()) {fail("Empty expression", s); }
-		System.out.println("TurnAR started" + s.hasNext());
+		System.out.println("TurnAR started " + s.hasNext());
 		require(TURN_AR, "no turnAR ", s);
 		require (SEMIC, "missing semicolon after turnAround ", s);
 		return turn_AR;
@@ -263,7 +262,7 @@ public class Parser {
 	private static RobotProgramNode parseWait(Scanner s) {
 		RobotProgramNode wait = new WaitNode();
 		if(!s.hasNext()) {fail("Empty expression", s);}
-		System.out.println("Wait started" + s.hasNext());
+		System.out.println("Wait started " + s.hasNext());
 		require(WAIT, "no wait ", s);
 		require (SEMIC, "missing semicolon after wait ", s);
 		return wait;
@@ -271,6 +270,7 @@ public class Parser {
 	private static RobotProgramNode parseTakeFuel(Scanner s) {
 		RobotProgramNode takeFuel = new TakeFuelNode();
 		if(!s.hasNext()) {fail("Empty expression", s);}
+		System.out.println("TakeFule started " + s.hasNext());
 		require(TAKEFUEL, "no wait ", s);
 		require (SEMIC, "missing semicolon after takeFuel ", s);
 		return takeFuel;
@@ -367,7 +367,7 @@ public class Parser {
 }
 
 // You could add the node classes here, as long as they are not declared public (or private)
-//TODO Add node classes here as needed
+//TODO Node classes here -  add more as needed
 class MoveNode implements RobotProgramNode {
 	//	call the move method in Robot
 	public String toString(){
@@ -472,9 +472,9 @@ class STATNode implements RobotProgramNode{
 //		call the Programme elements to execute actually I need a an array or list of elements in the programme
 	}
 }
-class ACTNode implements RobotProgramNode{
+class ActNode implements RobotProgramNode{
 	//	for now, one action, there are likely several so need an array of actNodes and a for act in Actnodes on the toString and execute methods
-	ACTNode st = this.st;
+	ActNode st = this.st;
 	public String toString() {
 		return "block node " + this.st;
 	}
