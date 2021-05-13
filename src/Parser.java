@@ -77,7 +77,7 @@ public class Parser {
 	// Useful Patterns
 
 	private static final Pattern NUMPAT = Pattern.compile("-?\\d+"); // ("-?(0|[1-9][0-9]*)");
-
+	private static final Pattern SEMIC =  Pattern.compile(";");
 	private static final  Pattern OPENPAREN = Pattern.compile("\\(");
 	private static final  Pattern CLOSEPAREN = Pattern.compile("\\)");
 	private static final  Pattern OPENBRACE = Pattern.compile("\\{");
@@ -147,13 +147,19 @@ public class Parser {
 //		 an operation (add, multiply, etc)
 //		 a term or number
 //		 an action (move turn_l etc)
-		if(s.hasNext(MOVEPAT) || s.hasNext(TURN_L)|| s.hasNext(TURN_R)|| s.hasNext(TURN_AR)){return parseAct(s);}
-		if(s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT)|| s.hasNext(LOOP_PAT)){return parseStatement(s);}
-		if(s.hasNext(ADDPAT) || s.hasNext(SUBPAT)){return parseTerms(s);}
-		if(s.hasNext(MULPAT) || s.hasNext(DIVPAT)){return parseNum(s);}
-		return node;
+		while (s.hasNext()) {
+			if (s.hasNext(MOVEPAT) || s.hasNext(TURN_L) || s.hasNext(TURN_R) || s.hasNext(TURN_AR)||s.hasNext(WAIT)) {
+				nodeTree.add(parseAct(s));
+			} else if (s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)) {
+				nodeTree.add(parseStatement(s));
+			} else if (s.hasNext(ADDPAT) || s.hasNext(SUBPAT)) {
+				nodeTree.add(parseTerms(s));
+			} else if (s.hasNext(MULPAT) || s.hasNext(DIVPAT)) {
+				nodeTree.add(parseNum(s));
+			}
 		}
-
+		return new PROGNode();
+	}
 
 	static RobotProgramNode parseStatement (Scanner s){
 		if(!s.hasNext()) {fail("Empty expression", s);}
@@ -166,36 +172,77 @@ public class Parser {
 	}
 
 	private static RobotProgramNode parseLoop(Scanner s) {
-		return null;
+		if(!s.hasNext()) {fail("Empty expression on loop ", s);}
+		require(LOOP_PAT, "no loop ", s);
+		require(OPENBRACE, "no open brace on loop ", s);
+		if(s.hasNext(MOVEPAT) || s.hasNext(TURN_L) || s.hasNext(TURN_R) || s.hasNext(TURN_AR)||s.hasNext(WAIT)) {
+			s.next();
+			return parseAct(s);
+		}
+	   else if (s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)) {
+			s.next();
+			return parseStatement(s);
+		}
+	   else if(s.hasNext(CLOSEBRACE)) {fail("nothing between the loop braces ", s);}
+	   require(CLOSEBRACE, "no close brace on loop ", s);
+	   return null;
 	}
 
 	static RobotProgramNode parseAct(Scanner s){
 		RobotProgramNode child = null;
+		RobotProgramNode prog = new PROGNode();
 		if(!s.hasNext()) {fail("Empty expression", s);}
 		if (s.hasNext(MOVEPAT)){ return parseMove(s);}
-//		if (s.hasNext(TURN_L)){ return parseTurnL(s);}
-//		if (s.hasNext(TURN_R)){ return parseTurnR(s);}
-//		if (s.hasNext(TURN_AR)){ return parseTurnAround(s);}
-		fail ("unknown or missing expression", s);
-		return child;
+		if (s.hasNext(TURN_L)){ return parseTurnL(s);}
+		if (s.hasNext(TURN_R)){ return parseTurnR(s);}
+		if (s.hasNext(TURN_AR)){ return parseTurnAR(s);}
+		if (s.hasNext(WAIT)){ return parseWait(s);}
+		fail ("unknown or missing expression ", s);
+		return prog;
 		}
 
 	public static RobotProgramNode parseMove(Scanner s){
 		RobotProgramNode move1 = new MoveNode();
 		if(!s.hasNext()) {fail("Empty expression", s);}
-		else if (s.hasNext(";")){
-			return move1;
-		//				move the robot; which robot? ?? what do I return to actually move it?
-		}
+		require(MOVEPAT, "no move ", s);
 //		else if(s.hasNext("\\(")){
 //		// find out if the term inside the brackets is valid and evaluate it
 //		require and element and a close bracket
 //			return move2(term);
 //		}
-		else {fail("not a move node", s);
-		}
-		return null;
+		require (SEMIC, "missing semicolon on move ", s);
+		return move1;
 	}
+	private static RobotProgramNode parseTurnL(Scanner s) {
+		RobotProgramNode turn_L = new TurnLNode();
+		if(!s.hasNext()) {fail("Empty expression", s);}
+		require(TURN_L, "no turnL ", s);
+		require (SEMIC, "missing semicolon on turnL ", s);
+		return turn_L;
+	}
+	private static RobotProgramNode parseTurnR(Scanner s) {
+		RobotProgramNode turn_R = new TurnRNode();
+		if(!s.hasNext()) {fail("Empty expression", s);}
+		require(TURN_R, "no turnR ", s);
+		require (SEMIC, "missing semicolon on turn_R ", s);
+		return turn_R;
+	}
+	private static RobotProgramNode parseTurnAR(Scanner s) {
+		RobotProgramNode turn_AR = new TurnARNode();
+		if(!s.hasNext()) {fail("Empty expression", s);}
+		require(TURN_AR, "no turnAR ", s);
+		require (SEMIC, "missing semicolon after turnAround ", s);
+		return turn_AR;
+	}
+	private static RobotProgramNode parseWait(Scanner s) {
+		RobotProgramNode wait = new WaitNode();
+		if(!s.hasNext()) {fail("Empty expression", s);}
+		require(WAIT, "no wait ", s);
+		require (SEMIC, "missing semicolon after wait ", s);
+		return wait;
+	}
+
+
 	private static RobotProgramNode parseNum(Scanner s) {
 		return null;
 	}
@@ -299,7 +346,7 @@ class MoveNode implements RobotProgramNode {
 }
 
 class TurnLNode implements RobotProgramNode {
-	//	call the turn method in Robot
+	//	call the turLn method in Robot
 	public String toString(Robot robot) {
 		return "turnL " + robot.toString();
 	}
@@ -311,13 +358,35 @@ class TurnLNode implements RobotProgramNode {
 }
 
 class TurnRNode implements RobotProgramNode {
-	//	call the turn method in Robot
+	//	call the turnR method in Robot
 	public String toString(Robot robot) {
 		return "turnR " + robot.toString();
 	}
 
 	public Robot execute(Robot robot) {
 		robot.turnRight();
+		return robot;
+	}
+}
+
+class TurnARNode implements RobotProgramNode {
+	//	call the turnAround method in Robot
+	public String toString(Robot robot) {
+		return "turnAR " + robot.toString();
+	}
+
+	public Robot execute(Robot robot) {
+		robot.turnAround();
+		return robot;
+	}
+}
+class WaitNode implements RobotProgramNode {
+	//	call the wait method in Robot
+	public String toString(Robot robot) {
+		return "wait " + robot.toString();
+	}
+	public Robot execute(Robot robot) {
+		robot.idleWait();
 		return robot;
 	}
 }
@@ -344,8 +413,8 @@ class BlockNode implements RobotProgramNode{
 //		call the BlockNode elements to execute actually I need a different ActNode that is a RobotProgrammeNode
 		return null;
 	}
-
 }
+
 class PROGNode implements RobotProgramNode{
 	//	for now, one action, there are likely several so need an array of actNodes and a for act in Actnodes on the toString and execute methods
 	STATNode st = this.st;
