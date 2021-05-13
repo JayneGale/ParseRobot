@@ -4,7 +4,7 @@
  */
 
 interface RobotProgramNode {
-	Robot execute(Robot robot);
-	String toString();
+	public void execute(Robot robot);
+	public String toString();
 }
 
