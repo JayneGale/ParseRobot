@@ -77,12 +77,12 @@ public class Parser {
 	}
 
 	// Useful Patterns
-
-	private static final Pattern SEMIC =  Pattern.compile(";");
+	// Symbols
 	private static final  Pattern OPENPAREN = Pattern.compile("\\(");
 	private static final  Pattern CLOSEPAREN = Pattern.compile("\\)");
 	private static final  Pattern OPENBRACE = Pattern.compile("\\{");
 	private static final  Pattern CLOSEBRACE = Pattern.compile("\\}");
+	private static final Pattern SEMIC =  Pattern.compile(";");
 
 	// Operator patterns
 	private static final Pattern NUMPAT = Pattern.compile("-?\\d+"); // ("-?(0|[1-9][0-9]*)");
@@ -92,8 +92,8 @@ public class Parser {
 	private static final  Pattern DIVPAT = Pattern.compile("/");
 
 	// Robot action patterns
-	private static final  Pattern TURN_L = Pattern.compile("turnL");
 	private static final  Pattern MOVEPAT = Pattern.compile("move");
+	private static final  Pattern TURN_L = Pattern.compile("turnL");
 	private static final  Pattern TURN_R = Pattern.compile("turnR");
 	private static final  Pattern TURN_AR = Pattern.compile("turnAround");
 	private static final  Pattern WAIT = Pattern.compile("wait");
@@ -141,10 +141,9 @@ public class Parser {
 	/**
 	 * PROG ::= STMT+
 	 */
-//TODO the pareser methods are here
+//TODO the parse methods are here
 	// THE PARSER GOES HERE
 	static RobotProgramNode parseProgram(Scanner s) {
-		RobotProgramNode node = null;
 		ArrayList<RobotProgramNode> nodeTree = new ArrayList<>();
 //		use a constructor to return the nodeTree
 //		 scan for a
@@ -157,6 +156,7 @@ public class Parser {
 		while (s.hasNext()) {
 			if (s.hasNext(MOVEPAT) || s.hasNext(TURN_L) || s.hasNext(TURN_R) || s.hasNext(TURN_AR) || s.hasNext(WAIT) || s.hasNext(TAKEFUEL)) {
 				nodeTree.add(parseAct(s));
+
 			} else if (s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)) {
 				nodeTree.add(parseStatement(s));
 			} else if (s.hasNext(ADDPAT) || s.hasNext(SUBPAT)) {
@@ -170,8 +170,8 @@ public class Parser {
 		if (nodeTree != null) {
 			for (RobotProgramNode n : nodeTree)
 				System.out.println("nodeTree " + n.toString());
-
 		}
+
 		PROGNode newP = new PROGNode();
 		for(RobotProgramNode n : nodeTree){
 			newP.addToArray(n);
