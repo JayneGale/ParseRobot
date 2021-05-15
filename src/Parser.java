@@ -3,7 +3,6 @@ import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.regex.*;
 import javax.swing.JFileChooser;
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 
 /**
  * The parser and interpreter. The top level parse function, a main method for
@@ -25,7 +24,6 @@ public class Parser {
 			scan.useDelimiter("\\s+|(?=[{}(),;])|(?<=[{}(),;])");
 
 			RobotProgramNode n = parseProgram(scan); // You need to implement this!!!
-//TODO implement parseProgram(scan) in RobotProgramNode
 			scan.close();
 			return n;
 		} catch (FileNotFoundException e) {
@@ -77,6 +75,8 @@ public class Parser {
 	}
 
 	// Useful Patterns
+//region PATTERNS
+
 	// Symbols
 	private static final  Pattern OPENPAREN = Pattern.compile("\\(");
 	private static final  Pattern CLOSEPAREN = Pattern.compile("\\)");
@@ -91,6 +91,7 @@ public class Parser {
 	private static final  Pattern MULPAT = Pattern.compile("\\*");
 	private static final  Pattern DIVPAT = Pattern.compile("/");
 
+
 	// Robot action patterns
 	private static final  Pattern MOVEPAT = Pattern.compile("move");
 	private static final  Pattern TURN_L = Pattern.compile("turnL");
@@ -100,6 +101,7 @@ public class Parser {
 	private static final  Pattern TAKEFUEL = Pattern.compile("takeFuel");
 	private static final  Pattern SHIELDON = Pattern.compile("shieldOn");
 	private static final  Pattern SHIELDOFF = Pattern.compile("shieldOff");
+	private static final  Pattern SHIELDGEN= Pattern.compile("shieldOn|shieldOff");
 
 	//  Sense patterns
 	private static final  Pattern FUEL = Pattern.compile("fuel");
@@ -113,21 +115,19 @@ public class Parser {
 	private static final  Pattern WALLDIST = Pattern.compile("wallDist");
 
 // Statement patterns
-	private static final  Pattern LOOP_PAT = Pattern.compile("loop");
-	private static final  Pattern WHILE_PAT = Pattern.compile("while");
 	private static final  Pattern IF_PAT = Pattern.compile("if");
+	private static final  Pattern WHILE_PAT = Pattern.compile("while");
+	private static final  Pattern LOOP_PAT = Pattern.compile("loop");
+	private static final  Pattern ACT_PAT = Pattern.compile("move|turnL|turnR|turnAround|wait|takeFuel|shieldOn|shieldOff");
 
-// TODO there may be more patterns to add
-//
 //	Pattern numPat = Pattern.compile( "[-+]?(\\d+([.]\\d*)?|[.]\\d+)");
-//	Pattern addPat = Pattern.compile("add");
-//	Pattern subPat = Pattern.compile("sub");
-//	Pattern mulPat = Pattern.compile("mul");
-//	Pattern divPat = Pattern.compile("div");
 //	Pattern opPat = Pattern.compile("add|sub|mul|div");
 //	Pattern openPat = Pattern.compile("\\(");
 //	Pattern commaPat = Pattern.compile(",");
 //	Pattern closePat = Pattern.compile("\\)");
+
+	//	endregion
+
 //public Node parseExpr(Scanner s) {
 //	Node n;
 //	if (!s.hasNext()) { return false; }
@@ -154,80 +154,104 @@ public class Parser {
 //		 term factor or number
 //		 action (move turn_l etc)
 		while (s.hasNext()) {
-			if (s.hasNext(MOVEPAT) || s.hasNext(TURN_L) || s.hasNext(TURN_R) || s.hasNext(TURN_AR) || s.hasNext(WAIT) || s.hasNext(TAKEFUEL)) {
-				nodeTree.add(parseAct(s));
-
-			} else if (s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)) {
+			if (s.hasNext(MOVEPAT) || s.hasNext(TURN_L) || s.hasNext(TURN_R) || s.hasNext(TURN_AR) || s.hasNext(WAIT)
+					|| s.hasNext(TAKEFUEL) || s.hasNext(SHIELDON) || s.hasNext(SHIELDOFF)
+					|| s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)
+//					|| s.hasNext(OPENBRACE) || s.hasNext(CLOSEBRACE) || s.hasNext(OPENPAREN) || s.hasNext(CLOSEPAREN)
+					|| s.hasNext(NUMPAT) || s.hasNext(ADDPAT) || s.hasNext(SUBPAT) || s.hasNext(MULPAT) || s.hasNext(DIVPAT)) {
 				nodeTree.add(parseStatement(s));
-			} else if (s.hasNext(ADDPAT) || s.hasNext(SUBPAT)) {
-				nodeTree.add(parseTerms(s));
-			} else if (s.hasNext(MULPAT) || s.hasNext(DIVPAT)) {
-				nodeTree.add(parseNum(s));
 			} else {
 				fail("unknown or missing expression ", s);
 			}
 		}
+
 		if (nodeTree != null) {
 			for (RobotProgramNode n : nodeTree)
 				System.out.println("nodeTree " + n.toString());
 		}
 
-		PROGNode newP = new PROGNode();
+		ProgramNode newP = new ProgramNode();
 		for(RobotProgramNode n : nodeTree){
 			newP.addToArray(n);
 		}
 		return newP;
 	}
-// STATEMENTS are here
+// parse STATEMENTS:
+//	region PARSE STATEMENTS: STMT IF WHILE LOOP BLOCK COND
 	static RobotProgramNode parseStatement (Scanner s){
 		if(!s.hasNext()) {fail("Empty expression", s);}
 		System.out.println("Stmt started: " + s.hasNext());
+
 //		STMT  ::= ACT ";" | LOOP | IF | WHILE | ASSGN ";"
-//		so should I add an ACT if here, or leave it in parseAct?
-		if (s.hasNext(LOOP_PAT)){
-			return parseLoop(s);}
-		if (s.hasNext(IF_PAT)){
-			return parseIf(s);}
-		if (s.hasNext(WHILE_PAT)){ return parseWhile(s);}
+		//			if (s.hasNext(MOVEPAT) || s.hasNext(TURN_L) || s.hasNext(TURN_R) || s.hasNext(TURN_AR) || s.hasNext(WAIT)
+//					|| s.hasNext(TAKEFUEL) || s.hasNext(SHIELDON) || s.hasNext(SHIELDOFF)) {
+
+		if (s.hasNext(ACT_PAT)) {
+			return parseAct(s);
+		} else if (s.hasNext(LOOP_PAT)){
+			return parseLoop(s);
+		} else if (s.hasNext(IF_PAT)){
+			return parseIf(s);
+		} else if (s.hasNext(WHILE_PAT)){
+			return parseWhile(s);
 //		if (s.hasNext(ASSGN)){ return parseAssignVar(s);}
-		fail ("unknown or missing expression", s);
-		return new STATNode();
+		} else if (s.hasNext(ADDPAT) || s.hasNext(SUBPAT)) {
+			return parseTerms(s);
+		} else if (s.hasNext(MULPAT) || s.hasNext(DIVPAT)) {
+			return parseFactor(s);
+		} else {
+			fail("unknown or missing expression in parseStatement ", s);
+		}
+		return new StatementNode();
 	}
-
-	private static RobotProgramNode parseWhile(Scanner s) {
-		if (!s.hasNext()) {
-			fail("Empty expression", s);
-		}
-		System.out.println("WHILE statement started " + s.hasNext());
-		require(WHILE_PAT, "no while ", s);
-		if (s.hasNext(OPENBRACE)) {
-//		WHILE ::= "while" "(" COND ")" BLOCK
-			parseCond(s);
-		}
-		if (s.hasNext(OPENBRACE)){
-			parseBlock(s);
-		}
-		fail ("unknown or missing braces or brackets in While ", s);
-		return new WhileNode();
-	}
-
 
 	private static RobotProgramNode parseIf(Scanner s) {
 		System.out.println("reached IF statement " + s.hasNext());
 //		IF    ::= "if" "(" COND ")" BLOCK [ "elif"  "(" COND ")"  BLOCK ]* [ "else" BLOCK ]
 		return null;
 	}
+	private static RobotProgramNode parseWhile(Scanner s) {
+		if (!s.hasNext()) {
+			fail("Empty expression", s);
+		}
+		System.out.println("WHILE statement started " + s.hasNext());
+		require(WHILE_PAT, "no while ", s);
+		if (s.hasNext(OPENPAREN)) {
+//		WHILE ::= "while" "(" COND ")" BLOCK
+			return parseCond(s);
+		}
+		if (s.hasNext(OPENBRACE)){
+			return parseBlock(s);
+		}
+		fail ("unknown or missing braces or brackets in While ", s);
+		return new WhileNode();
+	}
 
 	private static RobotProgramNode parseLoop(Scanner s) {
+		// TODO 			parseloop has to return an array list?
+//		While not )
+//		addtolist (Prog(s))
+//				Addtolist
+//	its now an end }
+//	when do I require the }
+
 		if(!s.hasNext()) {fail("Empty expression on loop ", s);}
 		System.out.println("Loop started " + s.hasNext());
 		require(LOOP_PAT, "no loop ", s);
 //		LOOP  ::= "loop" BLOCK
-		parseBlock(s);
+		if (s.hasNext(OPENBRACE)) {
+			RobotProgramNode b = parseBlock(s);
+			System.out.println("loop has b: " + b.toString());
+		}
+//		require(CLOSEBRACE, "no close brace on loop ", s);
+		return new LoopNode();
 //		if (s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)) {
 //		   require(CLOSEBRACE, "no close brace on loop ", s);
 //		   return parseStatement(s);}
-		return new LoopNode();
+//		While not )
+//		addtoBlock (Prog(s))
+//				Addtolist
+//	its now an end }
 	}
 	private static RobotProgramNode parseBlock(Scanner s) {
 		if(!s.hasNext()) {fail("Empty expression on block ", s);}
@@ -235,14 +259,22 @@ public class Parser {
 //		BLOCK ::= "{" STMT+ "}"
 		require(OPENBRACE, "no open brace on block ", s);
 		if(s.hasNext(CLOSEBRACE)) {fail("nothing between the block braces ", s);}
-		while(s.hasNext(MOVEPAT) || s.hasNext(TURN_L) || s.hasNext(TURN_R) || s.hasNext(TURN_AR)||s.hasNext(WAIT)||s.hasNext(TAKEFUEL)) {
-			parseAct(s);
+		ArrayList<RobotProgramNode> loopTree = new ArrayList<>();
+		BlockNode newL = new BlockNode();
+
+		while(s.hasNext(ACT_PAT) || s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)) {
+			RobotProgramNode b = parseStatement(s);
+			loopTree.add(b);
+			}
+			require(CLOSEBRACE, "no close brace on block ", s);
+		if (loopTree != null) {
+			for (RobotProgramNode n : loopTree)
+				newL.addToBlock(n);
+				System.out.println("loopTree " + n.toString());
 		}
-		require(CLOSEBRACE, "no close brace on loop ", s);
-//		if (s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)) {
-//		   require(CLOSEBRACE, "no close brace on loop ", s);
-//		   return parseStatement(s);}
-		return new BlockNode();
+
+		System.out.println("NewL.size"  + loopTree.size());
+		return newL;
 	}
 
 	private static RobotProgramNode parseCond(Scanner s) {
@@ -258,8 +290,9 @@ public class Parser {
 		require(CLOSEPAREN, "no close bracket on Cond ", s);
 		return new CondNode();
 	}
+// endregion
 
-//	Will need an expression node and two layers or OPNodes
+//	NEED an expression node and two layers or OPNodes
 //	EXP   ::= NUM | SEN | VAR | OP "(" EXP "," EXP ")"
 
 //Will need a SENSE node
@@ -269,12 +302,11 @@ public class Parser {
 //	OP   ::= "add" | "sub"
 //	OP2   ::= "mul" | "div"
 
-
-
 	// ACTIONS are here
+//	region parse ACTIONS : MOVE TURNL TURNR TURNAR WAIT TAKEFUEL SHIELD
 	static RobotProgramNode parseAct(Scanner s){
 		RobotProgramNode child = null;
-		RobotProgramNode prog = new PROGNode();
+		RobotProgramNode prog = new ProgramNode();
 		if(!s.hasNext()) {fail("Empty expression", s);}
 //		ACT   ::= "move" [ "(" EXP ")" ] | "turnL" | "turnR" | "turnAround" |
 //				"shieldOn" | "shieldOff" | "takeFuel" | "wait" [ "(" EXP ")" ]
@@ -284,7 +316,6 @@ public class Parser {
 		if (s.hasNext(TURN_AR)){ return parseTurnAR(s);}
 		if (s.hasNext(SHIELDON)){ return parseShield(s);}
 		if (s.hasNext(SHIELDOFF)){ return parseShield(s);}
-
 		if (s.hasNext(TAKEFUEL)){ return parseTakeFuel(s);}
 		if (s.hasNext(WAIT)){ return parseWait(s);}
 
@@ -352,7 +383,9 @@ public class Parser {
 		RobotProgramNode shieldNode = new ShieldNode();
 		return shieldNode;
 	}
+//endregion
 
+ //	region parse EXPRESSIONS NUMBERS TERMS FACTORS
 	private static RobotProgramNode parseNum(Scanner s) {
 		return null;
 	}
@@ -364,8 +397,10 @@ public class Parser {
 		return null;
 	}
 
+//endregion
 
 	// utility methods for the parser
+//region ACTION NODE CLASSES: MOVE TURN WAIT FUEL SHIELD
 
 	/**
 	 * Report a failure in the parser.
@@ -390,7 +425,6 @@ public class Parser {
 		fail(message, s);
 		return null;
 	}
-
 	static String require(Pattern p, String message, Scanner s) {
 		if (s.hasNext(p)) {
 			return s.next();
@@ -411,7 +445,6 @@ public class Parser {
 		fail(message, s);
 		return -1;
 	}
-
 	static int requireInt(Pattern p, String message, Scanner s) {
 		if (s.hasNext(p) && s.hasNextInt()) {
 			return s.nextInt();
@@ -419,7 +452,6 @@ public class Parser {
 		fail(message, s);
 		return -1;
 	}
-
 	/**
 	 * Checks whether the next token in the scanner matches the specified
 	 * pattern, if so, consumes the token and return true. Otherwise returns
@@ -433,7 +465,6 @@ public class Parser {
 			return false;
 		}
 	}
-
 	static boolean checkFor(Pattern p, Scanner s) {
 		if (s.hasNext(p)) {
 			s.next();
@@ -442,11 +473,10 @@ public class Parser {
 			return false;
 		}
 	}
-
 }
 
 // You could add the node classes here, as long as they are not declared public (or private)
-//TODO Node classes here
+//ACTION NODEs: MOVE TURN WAIT FUEL SHIELD
 class MoveNode implements RobotProgramNode {
 	//	call the move method in Robot
 	public String toString(){
@@ -456,7 +486,6 @@ class MoveNode implements RobotProgramNode {
 		robot.move();
 	}
 }
-
 class TurnLNode implements RobotProgramNode {
 	//	call the turLn method in Robot
 	public String toString() {
@@ -467,7 +496,6 @@ class TurnLNode implements RobotProgramNode {
 		robot.turnLeft();
 	}
 }
-
 class TurnRNode implements RobotProgramNode {
 	//	call the turnR method in Robot
 	public String toString() {
@@ -477,7 +505,6 @@ class TurnRNode implements RobotProgramNode {
 		robot.turnRight();
 	}
 }
-
 class TurnARNode implements RobotProgramNode {
 	//	call the turnAround method in Robot
 	public String toString() {
@@ -496,34 +523,66 @@ class WaitNode implements RobotProgramNode {
 		robot.idleWait();
 	}
 }
-
 class TakeFuelNode implements RobotProgramNode {
 	public String toString() {
 		return "takeFuel ";
 	}
-
 	public void execute(Robot robot) {
 		robot.takeFuel();
 	}
 }
-
-class LoopNode implements RobotProgramNode{
-	BlockNode  block = this.block;
+class ShieldNode implements RobotProgramNode{
+	//	if(shieldState);
 	public String toString() {
-		return "loop " + this.block;
+		return "Shield node " ;
+	}
+	public void execute(Robot robot){
+		boolean shieldState = false;
+		robot.setShield(shieldState);
+	}
+//		execute(st.execute(robot));
+//		call the Programme elements to execute actually I need a an array or list of elements in the programme
+}
+
+// Statement NODES: LOOP IF WHILE COND BLOCK
+class ActNode implements RobotProgramNode {
+	//	for now, one action, there are likely several so need an array of actNodes and a for act in Actnodes on the toString and execute methods
+	ActNode st = this.st;
+	public String toString() {
+		return "Act node " + this.st;
 	}
 	public void execute(Robot robot) {
-//		exectue while (true)
-//			Arraylist of robot statements
-//				loop has to return an array list
-//		While not )
-//		addtolist (Prog(s))
-//				Addtolist
-//	its now a }
+//		ActNode has no direct execute method, it just calls the Acts directly
+	}
+}
+class LoopNode implements RobotProgramNode{
+	ArrayList<RobotProgramNode> loopTree = new ArrayList<>();
+
+//	ArrayList<RobotProgramNode> nodeTree = new ArrayList<>();
+//	public void addToArray(RobotProgramNode r) {
+//		nodeTree.add(r);
+//	}
+////	public String toString() {
+//		return "Node tree size: " + nodeTree.size();
+//	}
 //
-//	return	new looplist;
-//	to string()
-//		execute(robot); ??
+//	//		call all the Programme elements to execute in order
+	public void addToBlock(RobotProgramNode b) {
+		loopTree.add(b);
+	}
+	public String toString() {
+		return "loop block size " + loopTree.size();
+	}
+	public void execute(Robot robot) {
+//		Loop node endlessly calls its Block of Actions/Other Expressions
+// run thru to block list and execute each in turn
+		while (true){
+			for (RobotProgramNode n : loopTree){
+				n.execute(robot);
+			}
+//			Todo add the addtoBlock method here instead of loopNode
+		}
+//			Arraylist of robot statements
 	}
 }
 class WhileNode implements RobotProgramNode {
@@ -535,9 +594,7 @@ class WhileNode implements RobotProgramNode {
 //		execute(robot);
 	}
 }
-
-
-	class CondNode implements RobotProgramNode{
+class CondNode implements RobotProgramNode{
 	//	for now, one action, there are likely several so need an array of actNodes and a for act in Actnodes on the toString and execute methods
 	public String toString() {
 		return "Cond node " ;
@@ -547,7 +604,6 @@ class WhileNode implements RobotProgramNode {
 //		evaluate the CondNode elements to execute actually I need a different ActNode that is a RobotProgrammeNode
 	}
 }
-
 class BlockNode implements RobotProgramNode{
 	public String toString() {
 		return "block node " ;
@@ -558,55 +614,50 @@ class BlockNode implements RobotProgramNode{
 	}
 }
 
-class PROGNode implements RobotProgramNode{
+//TOP LEVEL Nodes PROG STMT ACT
+class ProgramNode implements RobotProgramNode {
 	ArrayList<RobotProgramNode> nodeTree = new ArrayList<>();
-	public void addToArray(RobotProgramNode r){
-	nodeTree.add(r);
+
+	public void addToArray(RobotProgramNode r) {
+		nodeTree.add(r);
 	}
 
 	public String toString() {
-		return "Prog node " ;
+		return "Node tree size: " + nodeTree.size();
 	}
-	public void execute(Robot robot){
 
+	//		call all the Programme elements to execute in order
+	public void execute(Robot robot) {
+		for (RobotProgramNode n : nodeTree) {
+			n.execute(robot);
 		}
+	}
+}
+class StatementNode implements RobotProgramNode {
+	ArrayList<RobotProgramNode> StatTree = new ArrayList<>();
+	public String toString() {
+		return "Statement node ";
+	}
+	public void execute(Robot robot) {
+//		robot.turnAround(); empty for Statement Node
+//		call the Programme elements to execute  I need a an array or list of elements in the programme
+	}
+}
+
+//	example from Lectures of List with children
+//class AddNode implements Node {
+//	final ArrayList<Node> children;
+//	public AddNode(ArrayList<Node> chn){
+//		children = chn; }
+//	public String toString() {
+//		String result = "[";
+//		for (Node n : children){result += n.toString();}
+//		return result + "]";
 
 //		execute(st.execute(robot));
 //		call the Programme elements to execute actually I need a an array or list of elements in the programme
-}
-class STATNode implements RobotProgramNode{
-	STATNode st = this.st;
-	public String toString() {
-		return "Statement node " + this.st;
-	}
-	public void execute(Robot robot){
-//		execute(st.execute(robot));
-//		call the Programme elements to execute actually I need a an array or list of elements in the programme
-	}
-}
-class ActNode implements RobotProgramNode{
-	//	for now, one action, there are likely several so need an array of actNodes and a for act in Actnodes on the toString and execute methods
-	ActNode st = this.st;
-	public String toString() {
-		return "block node " + this.st;
-	}
-	public void execute(Robot robot){
-//		execute(st.execute(robot));
-//		call the Programme elements to execute actually I need a an array or list of elements in the programme
-	}
-}
-class ShieldNode implements RobotProgramNode{
-//	if(shieldState);
-	public String toString() {
-		return "Shield node " ;
-	}
-	public void execute(Robot robot){
-		boolean shieldState = false;
-		robot.setShield(shieldState);
-	}
-//		execute(st.execute(robot));
-//		call the Programme elements to execute actually I need a an array or list of elements in the programme
-}
+
+//endregion
 //		LOOP and BLOCK rules will need to construct the string out of their components.
 //	The execute method for LoopNode will not call methods on the robot directly, but will repeatedly call the execute method of the BlockNode that it contains. Similarly, the BlockNode will need to call the execute method of each of its components in turn.
 //		The node classes should also have a toString method which returns a textual representation of the node. The nodes corresponding to the PROG, STMT, LOOP and BLOCK rules will need to construct the string out of their components. For example, the LoopNode class might have the following method (assuming that block is a field containing the BlockNode that is contained in the LoopNode):
