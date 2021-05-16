@@ -1,11 +1,13 @@
 move;
 turnL;
-move; move; takeFuel;
+turnR;
 loop{
 	move;
+	turnL;
 	turnR;
-	move;
-	turnR;
+	turnAR;
 	move;
 	turnL;
+	turnR;
+	move;
 }
