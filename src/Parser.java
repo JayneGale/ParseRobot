@@ -203,8 +203,8 @@ public class Parser {
 			return parseIf(s);
 		} else if (s.hasNext(WHILE_PAT)) {
 			return parseWhile(s);
-		} else if (s.hasNext(EXP_PAT)){
-			return parseAssignVar(s);
+//		} else if (s.hasNext(EXP_PAT)){
+//			return parseAssignVar(s);
 		} else {
 			fail("parseStatement unknown or missing expression ", s);
 		}
@@ -299,6 +299,8 @@ public class Parser {
 		if(!s.hasNext()) {fail("Empty expression", s);}
 //		ACT   ::= "move" [ "(" EXP ")" ] | "turnL" | "turnR" | "turnAround" |
 //				"shieldOn" | "shieldOff" | "takeFuel" | "wait" [ "(" EXP ")" ]
+//	move = 0, TurnL = 1, turnR = 2, TurnAround = 3, takeFuel = 4, wait = 5;
+
 		if (s.hasNext(MOVEPAT)){ return parseMove(s);}
 		else if (s.hasNext(TURN_L)){ return parseTurnL(s);}
 		else if (s.hasNext(TURN_R)){ return parseTurnR(s);}
@@ -317,6 +319,10 @@ public class Parser {
 		require(MOVEPAT, "no move ", s);
 // 		TODO currently move has no EXP option
 //		allow second type of move which holds an expression - move2
+//		restOfMove = "" | "//("
+		int numMoves = 6;
+		for (int i = 0;i < numMoves; i++)
+			return move1;
 //		else if(s.hasNext("\\(")){
 //		// find out if the term inside the brackets is valid and evaluate it
 //		require and element and a close bracket
@@ -520,15 +526,41 @@ public class Parser {
 }
 //NODE CLASSES
 
-//region ACTION NODES: MOVE TURN WAIT FUEL SHIELD
+//region TERMINAL ACTION NODES: MOVE TURN WAIT FUEL SHIELD
 
 class MoveNode implements RobotProgramNode {
 	//	call the move method in Robot
-	public String toString(){
-		return  "move the robot ";
+	public int numMoves = 1;
+	public int moveType;
+//	move = 0, TurnL = 1, turnR = 2, TurnAround = 3, takeFuel = 4, wait = 5;
+//	public enum moveAction
+//	create an enum with the different moveActions
+	public void setNumMoves(int numMoves){
+		this.numMoves =  numMoves;
 	}
 	public void execute(Robot robot) {
-		robot.move();
+		if (moveType == 0 && numMoves > 0) {
+			for (int i = 0; i < numMoves; i++) {
+				robot.move();
+			}
+		}
+		else if (moveType == 1){robot.turnLeft();}
+		else if (moveType == 2){robot.turnRight();}
+		else if (moveType == 3){robot.turnAround();}
+		else if (moveType == 4){robot.takeFuel();}
+		else if (moveType == 5){robot.idleWait();}
+		else {System.err.println("Unknown moveType or numMoves<=0");}
+	}
+	public void setActionType(int type){
+	};
+	public String toString(){
+		if (moveType == 0) {return  "numMoves " + numMoves;}
+		else if (moveType == 1){return  "turnL ";}
+		else if (moveType == 2){return  "turnR ";}
+		else if (moveType == 3){return  "turnAround ";}
+		else if (moveType == 4){return  "takeFuel";}
+		else if (moveType == 5){return  "idleWait";}
+		else {return "Unknown moveType";}
 	}
 }
 class TurnLNode implements RobotProgramNode {
@@ -536,7 +568,6 @@ class TurnLNode implements RobotProgramNode {
 	public String toString() {
 		return "make robot turnL " ;
 	}
-
 	public void execute(Robot robot) {
 		robot.turnLeft();
 	}
@@ -631,7 +662,6 @@ class BlockNode implements RobotProgramNode{
 	public void addToBlock(RobotProgramNode b) {
 		blockList.add(b);
 	}
-
 	public void execute(Robot robot) {
 		if (blockList != null) {
 			while (true) {

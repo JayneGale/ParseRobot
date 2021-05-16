@@ -1,13 +1,9 @@
-move;
-turnL;
-turnR;
+move; move; move; turnL ;
+wait;
 loop{
-	move;
-	turnL;
-	turnR;
-	turnAround;
-	move;
-	turnL;
-	turnR;
-	move;
+  move; move; turnR;
+  move; move; turnR;
+  move; turnR;
+  move; move; turnR;
+  takeFuel;
 }
