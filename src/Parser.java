@@ -85,60 +85,73 @@ public class Parser {
 	private static final Pattern SEMIC =  Pattern.compile(";");
 
 	// Operator patterns
-	private static final Pattern NUMPAT = Pattern.compile("-?\\d+"); // ("-?(0|[1-9][0-9]*)");
-	private static final  Pattern ADDPAT = Pattern.compile("\\+");
-	private static final  Pattern SUBPAT = Pattern.compile("-");
-	private static final  Pattern MULPAT = Pattern.compile("\\*");
-	private static final  Pattern DIVPAT = Pattern.compile("/");
-	private static final Pattern EXP_PAT = Pattern.compile("/|\\*|-|\\+|-?\\d+");
+//	Numbers: options Pattern.compile("-?\\d+"); // ("-?(0|[1-9][0-9]*)"); ( "[-+]?(\\d+([.]\\d*)?|[.]\\d+)"); // for robot game only need integers
 
+	private static final Pattern NUMPAT = Pattern.compile("-?[0-9]+");
+	private static final  Pattern ADDPAT = Pattern.compile("add");
+	private static final  Pattern SUBPAT = Pattern.compile("sub");
+	private static final  Pattern MULPAT = Pattern.compile("mul");
+	private static final  Pattern DIVPAT = Pattern.compile("div");
+
+	//	OP   ::= "add" | "sub" | "mul" | "div"
+	private static final Pattern OP_PAT = Pattern.compile("add|sub|mul|div");
+
+	//	RELOP ::= "lt" | "gt" | "eq"
+	private static final Pattern RELOP_PAT = Pattern.compile("lt|gt|eq");
+	private static final  Pattern VAR_PAT = Pattern.compile("\\$[A-Za-z][A-Za-z0-9]*");
 
 	// Robot action patterns
+//	ACT   ::= "move" [ "(" EXP ")" ] | "turnL" | "turnR" | "turnAround" |
+//			"shieldOn" | "shieldOff" | "takeFuel" | "wait" [ "(" EXP ")" ]
 	private static final  Pattern MOVEPAT = Pattern.compile("move");
 	private static final  Pattern TURN_L = Pattern.compile("turnL");
 	private static final  Pattern TURN_R = Pattern.compile("turnR");
-	private static final  Pattern TURN_AR = Pattern.compile("turnAR");
+	private static final  Pattern TURN_AR = Pattern.compile("turnAround");
 	private static final  Pattern WAIT = Pattern.compile("wait");
 	private static final  Pattern TAKEFUEL = Pattern.compile("takeFuel");
 	private static final  Pattern SHIELDON = Pattern.compile("shieldOn");
 	private static final  Pattern SHIELDOFF = Pattern.compile("shieldOff");
 	private static final  Pattern SHIELDGEN= Pattern.compile("shieldOn|shieldOff");
+//	Todo add EXP option to wait and move
 
 	//  Sense patterns
-	private static final  Pattern FUEL = Pattern.compile("fuel");
 	private static final  Pattern FUELLEFT = Pattern.compile("fuelLeft");
 	private static final  Pattern OPP_LR = Pattern.compile("oppLR");
 	private static final  Pattern OPP_FB = Pattern.compile("oppFB");
 	private static final  Pattern NUM_BARRELS = Pattern.compile("numBarrels");
-	private static final  Pattern CLOSE_BARRELS = Pattern.compile("closestBarrelLR");
 	private static final  Pattern BARRELLR = Pattern.compile("barrelLR");
 	private static final  Pattern BARRELFB = Pattern.compile("barrelFB");
 	private static final  Pattern WALLDIST = Pattern.compile("wallDist");
+//	Todo add EXP option to barrelLR and barrelFB
 
 // Statement patterns
 	private static final  Pattern IF_PAT = Pattern.compile("if");
 	private static final  Pattern WHILE_PAT = Pattern.compile("while");
 	private static final  Pattern LOOP_PAT = Pattern.compile("loop");
-	private static final  Pattern ACT_PAT = Pattern.compile("move|turnL|turnR|turnAR|wait|takeFuel|shieldOn|shieldOff");
 
-//	Pattern numPat = Pattern.compile( "[-+]?(\\d+([.]\\d*)?|[.]\\d+)");
-//	Pattern opPat = Pattern.compile("add|sub|mul|div");
-//	Pattern openPat = Pattern.compile("\\(");
-//	Pattern commaPat = Pattern.compile(",");
-//	Pattern closePat = Pattern.compile("\\)");
+
+// General
+	//	ACT   ::= "move" [ "(" EXP ")" ] | "turnL" | "turnR" | "turnAround" |
+	//			"shieldOn" | "shieldOff" | "takeFuel" | "wait" [ "(" EXP ")" ]
+	private static final  Pattern ACT_PAT = Pattern.compile("move|turnL|turnR|turnAround|wait|takeFuel|shieldOn|shieldOff");
+	private static final Pattern SEN_PAT = Pattern.compile("fuelLeft|oppLR|oppFB|numBarrels|barrelLR|barrelFB|wallDist");
+
+	//	EXP   ::= NUM | SEN | VAR | OP "(" EXP "," EXP ")"
+	// 	EXPPAT = NUMPAT + SENPAT + VARPAT + OP_PAT
+	private static final Pattern EXP_PAT = Pattern.compile("-?[0-9]+|fuelLeft|oppLR|oppFB|numBarrels|barrelLR|barrelFB|wallDist|add|sub|mul|div|lt|gt|eq|and|or|not|\\$[A-Za-z][A-Za-z0-9]*");
+
+	//	COND ::= RELOP "(" EXP "," EXP ")"  | and ( COND, COND ) | or ( COND, COND )  | not ( COND )
+	//	COND_PAT = RELOP plus (and, or, not)
+	private static final Pattern COND_PAT = Pattern.compile("lt|gt|eq|and|or|not");
+
+	//	ASSGN ::= VAR "=" EXP
+	//	ASSGN_PAT = Pattern.compile("\\$[A-Za-z][A-Za-z0-9]*");
+	//	Todo Create any ASSIGN patterns when I get to Variables
+
+//  Pattern EXPR_PAT = Pattern.compile("/|\\*|-|\\+|-?\\d+");
 
 	//	endregion
 
-//public Node parseExpr(Scanner s) {
-//	Node n;
-//	if (!s.hasNext()) { return false; }
-//	if (s.hasNext(numPat)) { return parseNumber(s); }
-//	if (s.hasNext(addPat)) { return parseAdd(s); }
-//	if (s.hasNext(subPat)) { return parseSub(s); }
-//	if (s.hasNext(mulPat)) { return parseMul(s); }
-//	if (s.hasNext(divPat)) { return parseDiv(s); }
-//	return false;
-//}
 	/**
 	 * PROG ::= STMT+
 	 */
@@ -328,9 +341,9 @@ public class Parser {
 	}
 	private static RobotProgramNode parseTurnAR(Scanner s) {
 		if(!s.hasNext()) {fail("Empty expression", s); }
-		System.out.println("TurnAR started");
-		require(TURN_AR, "no turnAR ", s);
-		require (SEMIC, "missing semicolon after turnAR ", s);
+		System.out.println("turnAround started");
+		require(TURN_AR, "no turnAround ", s);
+		require (SEMIC, "missing semicolon after turnAround ", s);
 		return new TurnARNode();
 	}
 	private static RobotProgramNode parseWait(Scanner s) {
@@ -376,6 +389,19 @@ public class Parser {
  }
 	private static RobotProgramNode parseExpression(Scanner s) {
 //	EXP   ::= NUM | SEN | VAR | OP "(" EXP "," EXP ")"
+			if (!s.hasNext()) { fail("empty string", s); }
+
+		//public Node parseExpr(Scanner s) {
+//	Node n;
+//	if (!s.hasNext()) { return false; }
+//	if (s.hasNext(numPat)) { return parseNumber(s); }
+//	if (s.hasNext(addPat)) { return parseAdd(s); }
+//	if (s.hasNext(subPat)) { return parseSub(s); }
+//	if (s.hasNext(mulPat)) { return parseMul(s); }
+//	if (s.hasNext(divPat)) { return parseDiv(s); }
+//	return false;
+//}
+
 		return null;
 	}
 	private static RobotProgramNode parseSen(Scanner s) {
@@ -404,6 +430,16 @@ public class Parser {
 	private static RobotProgramNode parseNum(Scanner s) {
 		return null;
 	}
+//public Node parseExpr(Scanner s) {
+//	Node n;
+//	if (!s.hasNext()) { return false; }
+//	if (s.hasNext(numPat)) { return parseNumber(s); }
+//	if (s.hasNext(addPat)) { return parseAdd(s); }
+//	if (s.hasNext(subPat)) { return parseSub(s); }
+//	if (s.hasNext(mulPat)) { return parseMul(s); }
+//	if (s.hasNext(divPat)) { return parseDiv(s); }
+//	return false;
+//}
 
 //endregion
 

@@ -5,7 +5,7 @@ loop{
 	move;
 	turnL;
 	turnR;
-	turnAR;
+	turnAround;
 	move;
 	turnL;
 	turnR;
