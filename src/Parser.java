@@ -112,7 +112,7 @@ public class Parser {
 	private static final  Pattern SHIELDON = Pattern.compile("shieldOn");
 	private static final  Pattern SHIELDOFF = Pattern.compile("shieldOff");
 	private static final  Pattern SHIELDGEN= Pattern.compile("shieldOn|shieldOff");
-//	Todo add EXP option to wait and move
+//	Todo add restOfWait restOfMove EXP option to wait and move
 
 	//  Sense patterns
 	private static final  Pattern FUELLEFT = Pattern.compile("fuelLeft");
@@ -313,73 +313,84 @@ public class Parser {
 		}
 
 	public static RobotProgramNode parseMove(Scanner s){
-		RobotProgramNode move1 = new MoveNode();
+		MoveNode newMove = new MoveNode();
+		newMove.setMoveType(ActionType.move);
+		newMove.setNumMoves(1);
 		if(!s.hasNext()) {fail("Empty expression", s);}
 		System.out.println("303 Move started");
 		require(MOVEPAT, "no move ", s);
+//		newMove.setMoveType(newMove.moveTpe);
 // 		TODO currently move has no EXP option
 //		allow second type of move which holds an expression - move2
 //		restOfMove = "" | "//("
-		int numMoves = 6;
+		int numMoves = 0;
 		for (int i = 0;i < numMoves; i++)
-			return move1;
+			return newMove;
 //		else if(s.hasNext("\\(")){
 //		// find out if the term inside the brackets is valid and evaluate it
 //		require and element and a close bracket
 //			return move2(term);
 //		}
 		require (SEMIC, "parseMove missing semicolon on move ", s);
-		return move1;
+		return newMove;
 	}
 	private static RobotProgramNode parseTurnL(Scanner s) {
+		MoveNode newMove = new MoveNode();
+		newMove.setMoveType(ActionType.turnL);
 		if(!s.hasNext()) {fail("Empty expression", s);}
 		System.out.println("317 TurnL started");
 		require(TURN_L, "no turnL ", s);
 		require (SEMIC, "parseTurnL missing semicolon on turnL ", s);
-		return new TurnLNode();
+		return newMove;
 	}
 	private static RobotProgramNode parseTurnR(Scanner s) {
 		if(!s.hasNext()) {fail("Empty expression", s);}
+		MoveNode newMove = new MoveNode();
+		newMove.setMoveType(ActionType.turnR);
 		System.out.println("324 TurnR started");
 		require(TURN_R, "no turnR ", s);
 		require (SEMIC, "parseTurnR missing semicolon on turn_R ", s);
-		return new TurnRNode();
+		return newMove;
 	}
 	private static RobotProgramNode parseTurnAR(Scanner s) {
 		if(!s.hasNext()) {fail("Empty expression", s); }
+		MoveNode newMove = new MoveNode();
+		newMove.setMoveType(ActionType.turnAround);
 		System.out.println("turnAround started");
 		require(TURN_AR, "no turnAround ", s);
 		require (SEMIC, "missing semicolon after turnAround ", s);
-		return new TurnARNode();
+		return newMove;
 	}
 	private static RobotProgramNode parseWait(Scanner s) {
-		RobotProgramNode wait = new WaitNode();
 		if(!s.hasNext()) {fail("Empty expression", s);}
+		MoveNode newMove = new MoveNode();
+		newMove.setMoveType(ActionType.wait);
 		System.out.println("Wait started");
 //		TODO currently wait has no EXP option
 //		if (s.hasNext(OPENPAREN))
 //		Allow for wait; and wait2 with expression inside wait(EXP)
 		require(WAIT, "no wait ", s);
 		require (SEMIC, "wait missing semicolon ", s);
-		return wait;
+		return newMove;
 	}
 	private static RobotProgramNode parseTakeFuel(Scanner s) {
 		if(!s.hasNext()) {fail("Empty expression", s);}
+		MoveNode newMove = new MoveNode();
+		newMove.setMoveType(ActionType.takeFuel);
 		System.out.println("TakeFuel started");
 		require(TAKEFUEL, "no wait ", s);
 		require (SEMIC, "takeFuel missing semicolon ", s);
-		return new TakeFuelNode();
+		return newMove;
 	}
 
 	private static RobotProgramNode parseShield(Scanner s) {
 		if(!s.hasNext()) {fail("Empty expression", s);}
 		System.out.println("357 Shield started");
-		boolean shieldState = false;
-		if(s.hasNext(SHIELDON)) shieldState = true;
-		if(s.hasNext(SHIELDOFF)) shieldState = false;
-//		TODO set up the shield node to have a public boolean
+		MoveNode newMove = new MoveNode();
+		if(s.hasNext(SHIELDON)) newMove.setMoveType(ActionType.shieldOn);
+		if(s.hasNext(SHIELDOFF)) newMove.setMoveType(ActionType.shieldOff);
 		require (SEMIC, "parseShield missing semicolon ", s);
-		return new ShieldNode();
+		return newMove;
 	}
 //endregion
 
@@ -528,41 +539,7 @@ public class Parser {
 
 //region TERMINAL ACTION NODES: MOVE TURN WAIT FUEL SHIELD
 
-class MoveNode implements RobotProgramNode {
-	//	call the move method in Robot
-	public int numMoves = 1;
-	public int moveType;
-//	move = 0, TurnL = 1, turnR = 2, TurnAround = 3, takeFuel = 4, wait = 5;
-//	public enum moveAction
-//	create an enum with the different moveActions
-	public void setNumMoves(int numMoves){
-		this.numMoves =  numMoves;
-	}
-	public void execute(Robot robot) {
-		if (moveType == 0 && numMoves > 0) {
-			for (int i = 0; i < numMoves; i++) {
-				robot.move();
-			}
-		}
-		else if (moveType == 1){robot.turnLeft();}
-		else if (moveType == 2){robot.turnRight();}
-		else if (moveType == 3){robot.turnAround();}
-		else if (moveType == 4){robot.takeFuel();}
-		else if (moveType == 5){robot.idleWait();}
-		else {System.err.println("Unknown moveType or numMoves<=0");}
-	}
-	public void setActionType(int type){
-	};
-	public String toString(){
-		if (moveType == 0) {return  "numMoves " + numMoves;}
-		else if (moveType == 1){return  "turnL ";}
-		else if (moveType == 2){return  "turnR ";}
-		else if (moveType == 3){return  "turnAround ";}
-		else if (moveType == 4){return  "takeFuel";}
-		else if (moveType == 5){return  "idleWait";}
-		else {return "Unknown moveType";}
-	}
-}
+
 class TurnLNode implements RobotProgramNode {
 	//	call the turLn method in Robot
 	public String toString() {
@@ -620,107 +597,6 @@ class ShieldNode implements RobotProgramNode{
 //		call the Programme elements to execute actually I need a an array or list of elements in the programme
 }
 //endregion
-
-//STATEMENT NODES: ACT LOOP IF WHILE COND BLOCK
-//region Statement NODES: ACT LOOP IF WHILE COND BLOCK
-class ActNode implements RobotProgramNode {
-	//	for now, one action, there are likely several so need an array of actNodes and a for act in Actnodes on the toString and execute methods
-	public String toString() {
-		return "Act node ";
-	}
-	public void execute(Robot robot) {
-//		ActNode has no direct execute method, it just calls the Acts directly
-	}
-}
-class LoopNode implements RobotProgramNode{
-	ArrayList<RobotProgramNode> loopTree = new ArrayList<>();
-
-	public void addToBlock(RobotProgramNode b) {
-		loopTree.add(b);
-	}
-	public String toString() {
-		return "LoopNode: loopTree size " + loopTree.size();
-	}
-	public void execute(Robot robot) {
-	//		Loop node endlessly calls its Block of Actions/Other Expressions
-	// run thru to block list and execute each in turn
-		while (true) {
-			execute(robot);
-			//			Arraylist of robot statements
-			for (RobotProgramNode n : loopTree) {
-				n.execute(robot);
-			}
-		}
-	}
-}
-class BlockNode implements RobotProgramNode{
-	public ArrayList<RobotProgramNode> blockList = new ArrayList<>();
-	public String toString() {
-		return ("BlockNode: blockList size " + blockList.size());
-	}
-	//		call the BlockNode elements to execute
-	public void addToBlock(RobotProgramNode b) {
-		blockList.add(b);
-	}
-	public void execute(Robot robot) {
-		if (blockList != null) {
-			while (true) {
-				for (RobotProgramNode b : blockList) {
-					b.execute(robot);
-				}
-			}
-		}
-	}
-}
-
-class WhileNode implements RobotProgramNode {
-	public String toString() {
-		return "While node ";
-	}
-
-	public void execute(Robot robot) {
-	//		execute(robot);
-	}
-}
-class CondNode implements RobotProgramNode{
-	//	for now, one action, there are likely several so need an array of actNodes and a for act in Actnodes on the toString and execute methods
-	public String toString() {
-		return "Cond node " ;
-	}
-	public void execute(Robot robot){
-	//		execute(act.execute(robot));
-	//		evaluate the CondNode elements to execute actually I need a different ActNode that is a RobotProgrammeNode
-	}
-}
-//endregion
-
-//region TOP LEVEL NODES PROG STMT
-class ProgramNode implements RobotProgramNode {
-	ArrayList<RobotProgramNode> nodeTree = new ArrayList<>();
-	public void addToArray(RobotProgramNode r) {
-		nodeTree.add(r);
-	}
-	public String toString() {
-		return "Node tree size: " + nodeTree.size();
-	}
-
-	//		call all the Programme elements to execute in order
-	public void execute(Robot robot) {
-		for (RobotProgramNode n : nodeTree) {
-			n.execute(robot);
-		}
-	}
-}
-class StatementNode implements RobotProgramNode {
-	ArrayList<RobotProgramNode> StatTree = new ArrayList<>();
-	public String toString() {
-		return "Statement node ";
-	}
-	public void execute(Robot robot) {
-	//		robot.turnAround(); empty for Statement Node
-	//		call the Programme elements to execute  I need a an array or list of elements in the programme
-	}
-}
 
 //	example from Lectures of List with children
 //class AddNode implements Node {

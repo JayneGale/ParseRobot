@@ -1,9 +1,10 @@
 move; move; move; turnL ;
 wait;
 loop{
+  move; move; turnL;
   move; move; turnR;
-  move; move; turnR;
-  move; turnR;
+  move; turnL;
   move; move; turnR;
   takeFuel;
+  wait;
 }
