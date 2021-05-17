@@ -170,11 +170,10 @@ public class Parser {
 
 		while (s.hasNext()) {
 			if (s.hasNext(ACT_PAT) || s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)
-//					TODO change the expression patterns to words instead of symbols as per the syntax
 					|| s.hasNext(NUMPAT) || s.hasNext(EXP_PAT)) {
 				nodeTree.add(parseStatement(s));
 			} else {
-				fail("unknown or missing expression ", s);
+				fail("parseProgram unknown or missing expression ", s);
 			}
 		}
 		ProgramNode newP = new ProgramNode();
@@ -274,24 +273,22 @@ public class Parser {
 		//		WHILE ::= "while" "(" COND ")" BLOCK
 		require(WHILE_PAT, "no while ", s);
 		RobotProgramNode whileNode = new WhileNode();
-
 		if (s.hasNext(OPENPAREN)) {
 			whileNode = parseCond(s);
 		}
 //		if (s.hasNext(CLOSEBRACE)){
 //			return parseBlock(s);
 //		}
-		fail ("parseWhile unknown or missing braces or brackets ", s);
+		else fail ("parseWhile unknown or missing braces or brackets ", s);
 		return whileNode;
 	}
 
 	private static RobotProgramNode parseCond(Scanner s) {
 		if(!s.hasNext()) {fail("Empty expression on parsCond ", s);}
 		System.out.println("Cond started " + s.hasNext());
-		require(OPENPAREN, "no open bracket on block ", s);
+		require(OPENPAREN, "no open bracket on condition ", s);
 		if(s.hasNext(CLOSEPAREN)) {fail("no condition between brackets ", s);}
 		RobotProgramNode condNode = new CondNode();
-//		TODO write the actual Condition parse - how to recognise a RELOP COND or EXP
 		if(s.hasNext(COND_PAT)) condNode = parseRelOp(s);
 //		COND  ::= RELOP "(" SEN "," NUM ")
 //
@@ -303,8 +300,9 @@ public class Parser {
 	}
 	private static RobotProgramNode parseSen(Scanner s) {
 		if(!s.hasNext()) {fail("Empty expression on parseSen ", s);}
-		System.out.println("Sen started " + s.hasNext());
+		System.out.println("Sen started ");
 		SenNode newSen = new SenNode();
+//		require(OPENPAREN, "no open Paren on Sen", s);
 		//	SEN   ::= "fuelLeft" | "oppLR" | "oppFB" | "numBarrels" |
 		//			"barrelLR" [ "(" EXP ")" ] | "barrelFB" [ "(" EXP ")" ] | "wallDist"
 		if (s.hasNext(FUELLEFT)) { newSen.setSenType(SenType.fuelLeft);
@@ -338,9 +336,38 @@ public class Parser {
 		return null;
 	}
 	private static RobotProgramNode parseRelOp(Scanner s) {
-//	RELOP ::= "lt" | "gt" | "eq"
-		return null;
+		if (!s.hasNext()) {
+			fail("Empty expression on parseRelop ", s);
+		}
+		System.out.println("ParseRelOp started ");
+		//	RELOP ::= "lt" | "gt" | "eq"
+		RelOpNode relOp = new RelOpNode();
+		if (s.hasNext("lt")) {relOp.setRelOpType(RelOpType.lt); require("lt", "missing lt in lt ", s);}
+		else if (s.hasNext("gt")) {relOp.setRelOpType(RelOpType.gt); require("gt", "missing gt in lt ", s);}
+		else if (s.hasNext("eq")) {relOp.setRelOpType(RelOpType.eq); require("eq", "missing eq in lt ", s);}
+//		if (s.hasNext(OPENPAREN)) relOp.inSenValue = parseSen(s);
+		require(OPENPAREN, "no open paren on relOp", s);
+//		Todo up to here, need help with where to put the whole pattern and upload the variables
+		parseSen(s);
+		require(",", "missing comma in reLop after Sens", s);
+		parseNum(s);
+		require(CLOSEPAREN, "missing close paren on parseCond after Num ", s);
+		if (s.hasNext(ACT_PAT) || s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)
+				|| s.hasNext(NUMPAT) || s.hasNext(EXP_PAT)) { parseStatement(s);}
+		return relOp;
+		}
+
+	private static RobotProgramNode parseNum(Scanner s) {
+		NumNode numNode = new NumNode();
+		System.out.println("parseNum started ");
+		int value;
+		if (!s.hasNext()) {fail("Empty expression", s);}
+		value = Integer.parseInt(s.next());
+//		value = requireInt("", "missing integer pattern ",s);
+		numNode.setNum(value);
+		return numNode;
 	}
+
 
 // endregion
 
@@ -451,9 +478,7 @@ public class Parser {
 	private static RobotProgramNode parseFactor(Scanner s) {
 		return null;
 	}
-	private static RobotProgramNode parseNum(Scanner s) {
-		return null;
-	}
+
 //public Node parseExpr(Scanner s) {
 //	Node n;
 //	if (!s.hasNext()) { return false; }

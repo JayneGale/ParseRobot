@@ -2,8 +2,8 @@ import java.util.ArrayList;
 
 
     interface RobotNode {
-        public int eval();
-        public String toString();
+        int eval();
+        String toString();
     }
 //Operation nodes
 //class AddNode implements RobotNode {
@@ -89,9 +89,9 @@ class DivNode implements RobotNode {
 }
 
 // Types of Node Number (for Division or Multiplication) or Term (for Addition and Subtraction)
-class NumNode implements RobotNode {
+class NumNodeV implements RobotNode {
     final int value;
-    public NumNode(int v){ value = v; }
+    public NumNodeV(int v){ value = v; }
     public String toString() { return value + ""; }
     public int eval() { return this.value; }
 }

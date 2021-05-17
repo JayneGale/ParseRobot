@@ -1,5 +1,4 @@
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class ParseExp {
 //    public static void main(String[] a) {
@@ -90,7 +89,7 @@ public class ParseExp {
             fail("not an integer", s);
         }
 //        TODO up to here
-        return new NumNode(s.nextInt());
+        return new NumNodeV(s.nextInt());
     }
 
     //    public Node parseNum(Scanner s){
