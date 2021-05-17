@@ -4,7 +4,7 @@ public class CondNode implements RobotProgramNode{
         return "Cond node " ;
     }
     public void execute(Robot robot){
-        //		execute(act.execute(robot));
+        		execute(robot);
         //		evaluate the CondNode elements to execute actually I need a different ActNode that is a RobotProgrammeNode
     }
 }

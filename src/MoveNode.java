@@ -43,10 +43,10 @@ public class MoveNode implements RobotProgramNode {
             case shieldOn: { return "shieldOn "; }
             case shieldOff: { return "shieldOff "; }
             case wait: { return "idleWait: numWaits" + numWaits; }
+            default: System.out.println("moveType not found "); return ("need to set moveType enum ");}
         }
-        return ("need to set moveType enum ");
     }
-}
+
 
 
 

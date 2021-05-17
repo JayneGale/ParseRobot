@@ -111,8 +111,7 @@ public class Parser {
 	private static final  Pattern TAKEFUEL = Pattern.compile("takeFuel");
 	private static final  Pattern SHIELDON = Pattern.compile("shieldOn");
 	private static final  Pattern SHIELDOFF = Pattern.compile("shieldOff");
-	private static final  Pattern SHIELDGEN= Pattern.compile("shieldOn|shieldOff");
-//	Todo add restOfWait restOfMove EXP option to wait and move
+//	private static final  Pattern SHIELDGEN= Pattern.compile("shieldOn|shieldOff");
 
 	//  Sense patterns
 	private static final  Pattern FUELLEFT = Pattern.compile("fuelLeft");
@@ -159,10 +158,10 @@ public class Parser {
 	// THE PARSER GOES HERE
 	static RobotProgramNode parseProgram(Scanner s) {
 		ArrayList<RobotProgramNode> nodeTree = new ArrayList<>();
-//		use a constructor to return the nodeTree
 
 //		 scan for a
-//		 statement (loop, if, while etc),
+//		 statement (action, loop, if, while )
+
 //		 relative operation (gt, lt, equals)
 //		 variable (var)
 //		 operation (add (terms), multiply(factors), etc)
@@ -180,7 +179,7 @@ public class Parser {
 		}
 		ProgramNode newP = new ProgramNode();
 		if (nodeTree != null) {
-			System.out.println("A69 parseProgram, nodeTree contents: ");
+			System.out.println("183 parseProgram, nodeTree contents: ");
 			for (RobotProgramNode n : nodeTree) {
 				System.out.println(" - " + n.toString());
 				newP.addToArray(n);
@@ -209,28 +208,6 @@ public class Parser {
 			fail("parseStatement unknown or missing expression ", s);
 		}
 		return new StatementNode();
-	}
-
-	private static RobotProgramNode parseIf(Scanner s) {
-		System.out.println("201 reached parseIf " + s.hasNext());
-//		IF    ::= "if" "(" COND ")" BLOCK [ "elif"  "(" COND ")"  BLOCK ]* [ "else" BLOCK ]
-		return null;
-	}
-	private static RobotProgramNode parseWhile(Scanner s) {
-		if (!s.hasNext()) {
-			fail("Empty expression", s);
-		}
-		System.out.println("parseWhile started " + s.hasNext());
-		require(WHILE_PAT, "no while ", s);
-		if (s.hasNext(OPENPAREN)) {
-//		WHILE ::= "while" "(" COND ")" BLOCK
-			return parseCond(s);
-		}
-		if (s.hasNext(OPENBRACE)){
-			return parseBlock(s);
-		}
-		fail ("parseWhile unknown or missing braces or brackets ", s);
-		return new WhileNode();
 	}
 
 	private static RobotProgramNode parseLoop(Scanner s) {
@@ -278,19 +255,93 @@ public class Parser {
 		return newBL;
 	}
 
+	private static RobotProgramNode parseIf(Scanner s) {
+		if (!s.hasNext()) {	fail("Empty expression", s); }
+		System.out.println("214 reached parseIf " + s.hasNext());
+		IfNode ifNode = new IfNode();
+//		IF    ::= "if" "(" COND ")" BLOCK [ "elif"  "(" COND ")"  BLOCK ]* [ "else" BLOCK ]
+		require(IF_PAT, "no if ", s);
+		if (s.hasNext(OPENPAREN)) {
+//		WHILE ::= "while" "(" COND ")" BLOCK
+			return parseCond(s);
+		}
+		else return null;
+	}
+
+	private static RobotProgramNode parseWhile(Scanner s) {
+		if (!s.hasNext()) {	fail("Empty expression", s); }
+		System.out.println("parseWhile started " + s.hasNext());
+		//		WHILE ::= "while" "(" COND ")" BLOCK
+		require(WHILE_PAT, "no while ", s);
+		RobotProgramNode whileNode = new WhileNode();
+
+		if (s.hasNext(OPENPAREN)) {
+			whileNode = parseCond(s);
+		}
+//		if (s.hasNext(CLOSEBRACE)){
+//			return parseBlock(s);
+//		}
+		fail ("parseWhile unknown or missing braces or brackets ", s);
+		return whileNode;
+	}
+
 	private static RobotProgramNode parseCond(Scanner s) {
 		if(!s.hasNext()) {fail("Empty expression on parsCond ", s);}
 		System.out.println("Cond started " + s.hasNext());
 		require(OPENPAREN, "no open bracket on block ", s);
 		if(s.hasNext(CLOSEPAREN)) {fail("no condition between brackets ", s);}
+		RobotProgramNode condNode = new CondNode();
 //		TODO write the actual Condition parse - how to recognise a RELOP COND or EXP
-		if(s.hasNext(""))
+		if(s.hasNext(COND_PAT)) condNode = parseRelOp(s);
+//		COND  ::= RELOP "(" SEN "," NUM ")
+//
 //			number
 //		COND  ::= RELOP "(" EXP "," EXP ")"  | and ( COND, COND ) | or ( COND, COND )  | not ( COND )
 //		RELOP ::= "lt" | "gt" | "eq"
 		require(CLOSEPAREN, "no close bracket on Cond ", s);
-		return new CondNode();
+		return condNode;
 	}
+	private static RobotProgramNode parseSen(Scanner s) {
+		if(!s.hasNext()) {fail("Empty expression on parseSen ", s);}
+		System.out.println("Sen started " + s.hasNext());
+		SenNode newSen = new SenNode();
+		//	SEN   ::= "fuelLeft" | "oppLR" | "oppFB" | "numBarrels" |
+		//			"barrelLR" [ "(" EXP ")" ] | "barrelFB" [ "(" EXP ")" ] | "wallDist"
+		if (s.hasNext(FUELLEFT)) { newSen.setSenType(SenType.fuelLeft);
+				newSen.setNum(1);
+				require(FUELLEFT, "no token for fuelleft ", s);}
+		//			return parseMove(s);}
+		else if (s.hasNext(OPP_LR)) { newSen.setSenType(SenType.oppLR);
+			newSen.setNum(1);
+			require(OPP_LR, "no token for OPP_LR ", s);}
+		else if (s.hasNext(OPP_FB)) { newSen.setSenType(SenType.oppFB);
+			newSen.setNum(1);
+			require(OPP_FB, "no token for OPP_FB ", s);}
+		else if (s.hasNext(NUM_BARRELS)) { newSen.setSenType(SenType.numBarrels);
+			newSen.setNum(1); newSen.getNum();
+			require(NUM_BARRELS, "no token for numBarrels ", s);}
+		else if (s.hasNext(BARRELLR)) { newSen.setSenType(SenType.barrelLR);
+			newSen.setNum(1);
+			require(BARRELLR, "no token for barrelLR ", s);}
+		else if (s.hasNext(BARRELFB)) { newSen.setSenType(SenType.barrelFB);
+			newSen.setNum(1);
+			require(BARRELFB, "no token for barrelFB ", s);}
+		else if (s.hasNext(WALLDIST)) { newSen.setSenType(SenType.wallDist);
+			newSen.setNum(1);
+			require(WALLDIST, "no token for wallDist ", s);}
+		else fail ("parseSen unknown or missing senType ", s);
+		return newSen;
+	}
+
+	private static RobotProgramNode parseOp(Scanner s) {
+//	OP   ::= "add" | "sub" | "mul" | "div"
+		return null;
+	}
+	private static RobotProgramNode parseRelOp(Scanner s) {
+//	RELOP ::= "lt" | "gt" | "eq"
+		return null;
+	}
+
 // endregion
 
 	// ACTIONS are here
@@ -299,100 +350,69 @@ public class Parser {
 		if(!s.hasNext()) {fail("Empty expression", s);}
 //		ACT   ::= "move" [ "(" EXP ")" ] | "turnL" | "turnR" | "turnAround" |
 //				"shieldOn" | "shieldOff" | "takeFuel" | "wait" [ "(" EXP ")" ]
-//	move = 0, TurnL = 1, turnR = 2, TurnAround = 3, takeFuel = 4, wait = 5;
-
-		if (s.hasNext(MOVEPAT)){ return parseMove(s);}
-		else if (s.hasNext(TURN_L)){ return parseTurnL(s);}
-		else if (s.hasNext(TURN_R)){ return parseTurnR(s);}
-		else if (s.hasNext(TURN_AR)){ return parseTurnAR(s);}
-		else if (s.hasNext(SHIELDGEN)){ return parseShield(s);}
-		else if (s.hasNext(TAKEFUEL)){ return parseTakeFuel(s);}
-		else if (s.hasNext(WAIT)){ return parseWait(s);}
-		else fail ("parseAct unknown or missing expression ", s);
-		return new ActNode();
+		// 		TODO currently move has no EXP option add restOfWait restOfMove EXP option to wait and move
+		MoveNode newMove = new MoveNode();
+		if (s.hasNext(MOVEPAT)) {
+			newMove.setMoveType(ActionType.move);
+			newMove.setNumMoves(1);
+			require(MOVEPAT, "no move ", s);}
+//			return parseMove(s);}
+		else if (s.hasNext(TURN_L)){
+			newMove.setMoveType(ActionType.turnL);
+			require(TURN_L, "no turnL ", s);
 		}
+		else if (s.hasNext(TURN_R)){
+			newMove.setMoveType(ActionType.turnR);
+			require(TURN_R, "no turnR ", s);
+		}
+		else if (s.hasNext(TURN_AR)){
+			newMove.setMoveType(ActionType.turnAround);
+			require(TURN_AR, "no turnAround ", s);
+		}
+		else if(s.hasNext(SHIELDON)) {
+			newMove.setMoveType(ActionType.shieldOn);
+			require(SHIELDON, "no ShieldOn ", s);
+		}
+		else if(s.hasNext(SHIELDOFF)) {
+			newMove.setMoveType(ActionType.shieldOff);
+			require(SHIELDOFF, "no ShieldOff ", s);
+		}
+		else if (s.hasNext(TAKEFUEL)){
+			newMove.setMoveType(ActionType.takeFuel);
+			System.out.println("TakeFuel started");
+			require(TAKEFUEL, "no wait ", s);
+		}
+		else if (s.hasNext(WAIT)){
+			newMove.setMoveType(ActionType.wait);
+			newMove.setNumWaits(1);
+			require(WAIT, "no wait ", s);
+		}
+		else fail ("parseAct unknown or missing moveType ", s);
+		require(SEMIC, "parseAct missing semicolon on: " + newMove.moveType, s);
+		return newMove;}
 
-	public static RobotProgramNode parseMove(Scanner s){
-		MoveNode newMove = new MoveNode();
-		newMove.setMoveType(ActionType.move);
-		newMove.setNumMoves(1);
-		if(!s.hasNext()) {fail("Empty expression", s);}
-		System.out.println("303 Move started");
-		require(MOVEPAT, "no move ", s);
-//		newMove.setMoveType(newMove.moveTpe);
-// 		TODO currently move has no EXP option
-//		allow second type of move which holds an expression - move2
-//		restOfMove = "" | "//("
-		int numMoves = 0;
-		for (int i = 0;i < numMoves; i++)
-			return newMove;
-//		else if(s.hasNext("\\(")){
-//		// find out if the term inside the brackets is valid and evaluate it
-//		require and element and a close bracket
-//			return move2(term);
-//		}
-		require (SEMIC, "parseMove missing semicolon on move ", s);
-		return newMove;
-	}
-	private static RobotProgramNode parseTurnL(Scanner s) {
-		MoveNode newMove = new MoveNode();
-		newMove.setMoveType(ActionType.turnL);
-		if(!s.hasNext()) {fail("Empty expression", s);}
-		System.out.println("317 TurnL started");
-		require(TURN_L, "no turnL ", s);
-		require (SEMIC, "parseTurnL missing semicolon on turnL ", s);
-		return newMove;
-	}
-	private static RobotProgramNode parseTurnR(Scanner s) {
-		if(!s.hasNext()) {fail("Empty expression", s);}
-		MoveNode newMove = new MoveNode();
-		newMove.setMoveType(ActionType.turnR);
-		System.out.println("324 TurnR started");
-		require(TURN_R, "no turnR ", s);
-		require (SEMIC, "parseTurnR missing semicolon on turn_R ", s);
-		return newMove;
-	}
-	private static RobotProgramNode parseTurnAR(Scanner s) {
-		if(!s.hasNext()) {fail("Empty expression", s); }
-		MoveNode newMove = new MoveNode();
-		newMove.setMoveType(ActionType.turnAround);
-		System.out.println("turnAround started");
-		require(TURN_AR, "no turnAround ", s);
-		require (SEMIC, "missing semicolon after turnAround ", s);
-		return newMove;
-	}
-	private static RobotProgramNode parseWait(Scanner s) {
-		if(!s.hasNext()) {fail("Empty expression", s);}
-		MoveNode newMove = new MoveNode();
-		newMove.setMoveType(ActionType.wait);
-		System.out.println("Wait started");
-//		TODO currently wait has no EXP option
-//		if (s.hasNext(OPENPAREN))
-//		Allow for wait; and wait2 with expression inside wait(EXP)
-		require(WAIT, "no wait ", s);
-		require (SEMIC, "wait missing semicolon ", s);
-		return newMove;
-	}
-	private static RobotProgramNode parseTakeFuel(Scanner s) {
-		if(!s.hasNext()) {fail("Empty expression", s);}
-		MoveNode newMove = new MoveNode();
-		newMove.setMoveType(ActionType.takeFuel);
-		System.out.println("TakeFuel started");
-		require(TAKEFUEL, "no wait ", s);
-		require (SEMIC, "takeFuel missing semicolon ", s);
-		return newMove;
-	}
-
-	private static RobotProgramNode parseShield(Scanner s) {
-		if(!s.hasNext()) {fail("Empty expression", s);}
-		System.out.println("357 Shield started");
-		MoveNode newMove = new MoveNode();
-		if(s.hasNext(SHIELDON)) newMove.setMoveType(ActionType.shieldOn);
-		if(s.hasNext(SHIELDOFF)) newMove.setMoveType(ActionType.shieldOff);
-		require (SEMIC, "parseShield missing semicolon ", s);
-		return newMove;
-	}
-//endregion
+//	I replaced all the individual nodes with one MoveNode with enum states
+//	public static RobotProgramNode parseMove(Scanner s){
+//		MoveNode newMove = new MoveNode();
+//		newMove.setMoveType(ActionType.move);
+//		newMove.setNumMoves(1);
+//		if(!s.hasNext()) {fail("Empty expression", s);}
+//		System.out.println("303 Move started");
+//		require(MOVEPAT, "no move ", s);
+////		newMove.setMoveType(newMove.move);
+////		allow second type of move which holds an expression - move2
+////		restOfMove = "" | "//("
+//		int numMoves = 0;
+//		for (int i = 0;i < numMoves; i++)
+//			return newMove;
+////		else if(s.hasNext("\\(")){
+////		// find out if the term inside the brackets is valid and evaluate it
+////		require and element and a close bracket
+////			return move2(term);
+////		}
+//		require (SEMIC, "parseMove missing semicolon on move ", s);
+//		return newMove;
+//	}
 
 //	region parse ASSIGNVAR, VAR, EXPRESSION, SENSES, OPERATIONS, RELATIVE OPS, TERMS, FACTORS, NUMBER
 
@@ -419,19 +439,6 @@ public class Parser {
 //	return false;
 //}
 
-		return null;
-	}
-	private static RobotProgramNode parseSen(Scanner s) {
-//	SEN   ::= "fuelLeft" | "oppLR" | "oppFB" | "numBarrels" |
-//			"barrelLR" [ "(" EXP ")" ] | "barrelFB" [ "(" EXP ")" ] | "wallDist"
-		return null;
-	}
-	private static RobotProgramNode parseOp(Scanner s) {
-//	OP   ::= "add" | "sub" | "mul" | "div"
-		return null;
-	}
-	private static RobotProgramNode parseRelOp(Scanner s) {
-//	RELOP ::= "lt" | "gt" | "eq"
 		return null;
 	}
 	private static RobotProgramNode parseVar(Scanner s) {
@@ -539,64 +546,6 @@ public class Parser {
 
 //region TERMINAL ACTION NODES: MOVE TURN WAIT FUEL SHIELD
 
-
-class TurnLNode implements RobotProgramNode {
-	//	call the turLn method in Robot
-	public String toString() {
-		return "make robot turnL " ;
-	}
-	public void execute(Robot robot) {
-		robot.turnLeft();
-	}
-}
-class TurnRNode implements RobotProgramNode {
-	//	call the turnR method in Robot
-	public String toString() {
-		return "make robot turnR " ;
-	}
-	public void execute(Robot robot) {
-		robot.turnRight();
-	}
-}
-class TurnARNode implements RobotProgramNode {
-	//	call the turnAround method in Robot
-	public String toString() {
-		return "turnAR " ;
-	}
-	public void execute(Robot robot) {
-		robot.turnAround();
-	}
-}
-class WaitNode implements RobotProgramNode {
-	//	call the wait method in Robot
-	public String toString() {
-		return "wait " ;
-	}
-	public void execute(Robot robot) {
-		robot.idleWait();
-	}
-}
-class TakeFuelNode implements RobotProgramNode {
-	public String toString() {
-		return "takeFuel ";
-	}
-	public void execute(Robot robot) {
-		robot.takeFuel();
-	}
-}
-class ShieldNode implements RobotProgramNode{
-	//	if(shieldState);
-	public String toString() {
-		return "Shield node " ;
-	}
-	public void execute(Robot robot){
-		boolean shieldState = false;
-		robot.setShield(shieldState);
-	}
-//		execute(st.execute(robot));
-//		call the Programme elements to execute actually I need a an array or list of elements in the programme
-}
-//endregion
 
 //	example from Lectures of List with children
 //class AddNode implements Node {
