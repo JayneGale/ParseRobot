@@ -6,33 +6,33 @@ public class RelOpNode implements RobotProgramNode {        //	calls the relevan
         this.relOpType = relOpType;
     }
 
-    int inNum;
+    int inNum = 0;
     int inSenValue;
-    boolean out;
-    public int outNum;
+    boolean relOpResult = false;
+
 
     public void setNum(int inSenValue, int inNum) {
         this.inSenValue = inSenValue;
         this.inNum = inNum;
     }
     public boolean getNum() {
-        this.out = out;
-        return out;
+        this.relOpResult = relOpResult;
+        return relOpResult;
     }
 
     public void execute(Robot robot) {
         switch (relOpType) {
-            case lt: out = (inSenValue < inNum) ; break;
-            case gt: out = (inSenValue > inNum) ; break;
-            case eq: out = (inSenValue == inNum); break;
+            case lt: relOpResult = (inSenValue < inNum) ; break;
+            case gt: relOpResult = (inSenValue > inNum) ; break;
+            case eq: relOpResult = (inSenValue == inNum); break;
             default: System.out.println("relOpType not found "); break;
         }
     }
         public String toString() {
         switch (relOpType) {
-            case lt: return inSenValue  + " lt " + inNum + " is " + out;
-            case gt: return inSenValue  + " gt " + inNum + " is " + out;
-            case eq:return inSenValue  + " eq " + inNum + " is " + out;
+            case lt: return inSenValue  + " lt " + inNum + " is " + relOpResult;
+            case gt: return inSenValue  + " gt " + inNum + " is " + relOpResult;
+            case eq:return inSenValue  + " eq " + inNum + " is " + relOpResult;
             default: return ("relOpType enum not found ");
         }
     }

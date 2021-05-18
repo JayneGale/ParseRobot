@@ -1,5 +1,7 @@
 public class NumNode implements RobotProgramNode {
-    public int num = 10;
+    public int num = 0;
+//    NUM   ::= "-?[1-9][0-9]*|0"
+
     public void setNum (int num) {
         this.num = num;
     }
@@ -8,8 +10,8 @@ public class NumNode implements RobotProgramNode {
         return num;
     }
 
-    public void execute(Robot robot) {
-            }
+    public void execute(Robot robot)
+    { setNum(num); }
     public String toString() {
         return "numNode number " + num;
     }

@@ -1,3 +1,5 @@
 public enum RelOpType {
-    lt, gt, eq;
+    lt, gt, eq, gte, lte, noteq;
+//    COMP  ::= "<" | "<=" | ">" | ">=" | "==" | "!="
+
 }
