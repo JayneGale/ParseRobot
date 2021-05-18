@@ -276,9 +276,12 @@ public class Parser {
 		if (s.hasNext(OPENPAREN)) {
 			whileNode = parseCond(s);
 		}
-//		if (s.hasNext(CLOSEBRACE)){
-//			return parseBlock(s);
-//		}
+		require(CLOSEPAREN, "279 missing close brace on While ", s);
+		if (s.hasNext(OPENBRACE)){
+			return parseBlock(s);
+		}
+//		TODO error 279 missing close brace on While
+
 		else fail ("parseWhile unknown or missing braces or brackets ", s);
 		return whileNode;
 	}
@@ -336,9 +339,8 @@ public class Parser {
 		return null;
 	}
 	private static RobotProgramNode parseRelOp(Scanner s) {
-		if (!s.hasNext()) {
-			fail("Empty expression on parseRelop ", s);
-		}
+		if (!s.hasNext()) {	fail("Empty expression on parseRelop ", s); }
+		if (s.hasNext(CLOSEBRACE)) {	fail("Empty braces on parseRelop ", s); }
 		System.out.println("ParseRelOp started ");
 		//	RELOP ::= "lt" | "gt" | "eq"
 		RelOpNode relOp = new RelOpNode();
@@ -347,13 +349,17 @@ public class Parser {
 		else if (s.hasNext("eq")) {relOp.setRelOpType(RelOpType.eq); require("eq", "missing eq in lt ", s);}
 //		if (s.hasNext(OPENPAREN)) relOp.inSenValue = parseSen(s);
 		require(OPENPAREN, "no open paren on relOp", s);
-//		Todo up to here, need help with where to put the whole pattern and upload the variables
-		parseSen(s);
+		RobotProgramNode sen = parseSen(s);
+		String senSt = sen.toString();
+		System.out.println("ParseSenresult " + senSt);
 		require(",", "missing comma in reLop after Sens", s);
-		parseNum(s);
+		RobotProgramNode n = parseNum(s);
+		String num = n.toString();
+		System.out.println("ParseNum result " + num);
 		require(CLOSEPAREN, "missing close paren on parseCond after Num ", s);
-		if (s.hasNext(ACT_PAT) || s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)
-				|| s.hasNext(NUMPAT) || s.hasNext(EXP_PAT)) { parseStatement(s);}
+		if(s.hasNext(OPENBRACE)) {parseBlock(s);}
+//		if (s.hasNext(ACT_PAT) || s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)
+//				|| s.hasNext(NUMPAT) || s.hasNext(EXP_PAT)) { parseStatement(s);}
 		return relOp;
 		}
 
@@ -362,8 +368,8 @@ public class Parser {
 		System.out.println("parseNum started ");
 		int value;
 		if (!s.hasNext()) {fail("Empty expression", s);}
-		value = Integer.parseInt(s.next());
-//		value = requireInt("", "missing integer pattern ",s);
+//		value = Integer.parseInt(s.next());
+		value = requireInt(NUMPAT, "missing integer pattern ",s);
 		numNode.setNum(value);
 		return numNode;
 	}

@@ -1,4 +1,4 @@
-while(gt(fuelLeft, 0)){
+while(gt(fuelLeft, 2)){
 	if(eq(numBarrels, 0)){
 		wait;
 	}

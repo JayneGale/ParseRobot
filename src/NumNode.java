@@ -6,6 +6,6 @@ public class NumNode implements RobotProgramNode {
     public void execute(Robot robot) {
             }
     public String toString() {
-        return "numNode" + num;
+        return "numNode number " + num;
     }
 }
