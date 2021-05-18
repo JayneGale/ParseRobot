@@ -62,10 +62,12 @@ public class Parser {
 				if (res != JFileChooser.APPROVE_OPTION) {
 					break;
 				}
+				File f = chooser.getSelectedFile();
+				System.out.println("Parsing '" + f.getName() + "'");
 				RobotProgramNode prog = parseFile(chooser.getSelectedFile());
 				System.out.println("Parsing completed");
 				if (prog != null) {
-					System.out.println("Program: \n" + prog);
+					System.out.println("Program: \n" + prog );
 				}
 
 				System.out.println("=================");
@@ -241,48 +243,41 @@ public class Parser {
 		while(s.hasNext(ACT_PAT) || s.hasNext(LOOP_PAT) || s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT))   {
 			RobotProgramNode b = parseStatement(s);
 			loopTree.add(b);
-			System.out.println("255 parseBlock loopTree actions: " + b.toString());
+			System.out.println("244 parseBlock loopTree actions: " + b.toString());
 		}
-		require(CLOSEBRACE, "no close brace on block ", s);
+		require(CLOSEBRACE, "246 no close brace on block ", s);
 		if (loopTree != null) {
 			for (RobotProgramNode n : loopTree) {
 				newBL.addToBlock(n);
-				System.out.println("261 parseBlock loopTree toString " + n.toString());
+				System.out.println("250 parseBlock loopTree toString " + n.toString());
 			}
 		}
-		System.out.println("263 parseBlock return newBL loopTree.size: "  + loopTree.size() + " newBL size: " + newBL.blockList.size());
+		System.out.println("253 parseBlock return newBL loopTree.size: "  + loopTree.size() + " newBL size: " + newBL.blockList.size());
 		return newBL;
 	}
 
 	private static RobotProgramNode parseIf(Scanner s) {
 		if (!s.hasNext()) {	fail("Empty expression", s); }
-		System.out.println("214 reached parseIf " + s.hasNext());
-		IfNode ifNode = new IfNode();
+		System.out.println("214 parseIf started ");
 //		IF    ::= "if" "(" COND ")" BLOCK [ "elif"  "(" COND ")"  BLOCK ]* [ "else" BLOCK ]
 		require(IF_PAT, "no if ", s);
-		if (s.hasNext(OPENPAREN)) {
-//		WHILE ::= "while" "(" COND ")" BLOCK
-			return parseCond(s);
-		}
-		else return null;
+		RobotProgramNode ifNode = new IfNode();
+		if (s.hasNext(OPENPAREN)) { parseCond(s); }
+		if (s.hasNext(OPENBRACE)){parseBlock(s); }
+		else fail ("parseIf no block following or unknown expression ", s);
+		return ifNode;
 	}
 
 	private static RobotProgramNode parseWhile(Scanner s) {
 		if (!s.hasNext()) {	fail("Empty expression", s); }
 		System.out.println("parseWhile started " + s.hasNext());
-		//		WHILE ::= "while" "(" COND ")" BLOCK
+		//		WHILE ::= "while" "(" COND ")" BLOCK (= {})
 		require(WHILE_PAT, "no while ", s);
 		RobotProgramNode whileNode = new WhileNode();
-		if (s.hasNext(OPENPAREN)) {
-			whileNode = parseCond(s);
-		}
-		require(CLOSEPAREN, "279 missing close brace on While ", s);
-		if (s.hasNext(OPENBRACE)){
-			return parseBlock(s);
-		}
-//		TODO error 279 missing close brace on While
-
-		else fail ("parseWhile unknown or missing braces or brackets ", s);
+		if (s.hasNext(OPENPAREN)) {parseCond(s);}
+//		require(CLOSEPAREN, "279 missing close brace on While ", s);
+		if (s.hasNext(OPENBRACE)){parseBlock(s); }
+		else fail ("parseWhile no block following or unknown expression ", s);
 		return whileNode;
 	}
 
@@ -292,13 +287,13 @@ public class Parser {
 		require(OPENPAREN, "no open bracket on condition ", s);
 		if(s.hasNext(CLOSEPAREN)) {fail("no condition between brackets ", s);}
 		RobotProgramNode condNode = new CondNode();
-		if(s.hasNext(COND_PAT)) condNode = parseRelOp(s);
+		if(s.hasNext(COND_PAT)) parseRelOp(s);
 //		COND  ::= RELOP "(" SEN "," NUM ")
 //
 //			number
 //		COND  ::= RELOP "(" EXP "," EXP ")"  | and ( COND, COND ) | or ( COND, COND )  | not ( COND )
 //		RELOP ::= "lt" | "gt" | "eq"
-		require(CLOSEPAREN, "no close bracket on Cond ", s);
+		require(CLOSEPAREN, "298 no close paren on Cond ", s);
 		return condNode;
 	}
 	private static RobotProgramNode parseSen(Scanner s) {
@@ -344,9 +339,9 @@ public class Parser {
 		System.out.println("ParseRelOp started ");
 		//	RELOP ::= "lt" | "gt" | "eq"
 		RelOpNode relOp = new RelOpNode();
-		if (s.hasNext("lt")) {relOp.setRelOpType(RelOpType.lt); require("lt", "missing lt in lt ", s);}
-		else if (s.hasNext("gt")) {relOp.setRelOpType(RelOpType.gt); require("gt", "missing gt in lt ", s);}
-		else if (s.hasNext("eq")) {relOp.setRelOpType(RelOpType.eq); require("eq", "missing eq in lt ", s);}
+		if (s.hasNext("lt")) {relOp.setRelOpType(RelOpType.lt); System.out.println("RelOp " + relOp.toString()); require("lt", "missing lt in lt ", s);}
+		else if (s.hasNext("gt")) {relOp.setRelOpType(RelOpType.gt); System.out.println("RelOp " + relOp.toString()); require("gt", "missing gt in lt ", s);}
+		else if (s.hasNext("eq")) {relOp.setRelOpType(RelOpType.eq); System.out.println("RelOp " + relOp.toString()); require("eq", "missing eq in lt ", s);}
 //		if (s.hasNext(OPENPAREN)) relOp.inSenValue = parseSen(s);
 		require(OPENPAREN, "no open paren on relOp", s);
 		RobotProgramNode sen = parseSen(s);
@@ -354,12 +349,9 @@ public class Parser {
 		System.out.println("ParseSenresult " + senSt);
 		require(",", "missing comma in reLop after Sens", s);
 		RobotProgramNode n = parseNum(s);
-		String num = n.toString();
-		System.out.println("ParseNum result " + num);
-		require(CLOSEPAREN, "missing close paren on parseCond after Num ", s);
-		if(s.hasNext(OPENBRACE)) {parseBlock(s);}
-//		if (s.hasNext(ACT_PAT) || s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)
-//				|| s.hasNext(NUMPAT) || s.hasNext(EXP_PAT)) { parseStatement(s);}
+		String numInt = n.toString();
+		System.out.println("ParseNum result " + numInt);
+		require(CLOSEPAREN, "missing close paren on relOP after Num ", s);
 		return relOp;
 		}
 
@@ -371,6 +363,8 @@ public class Parser {
 //		value = Integer.parseInt(s.next());
 		value = requireInt(NUMPAT, "missing integer pattern ",s);
 		numNode.setNum(value);
+		int val = numNode.getNum();
+		System.out.println("parseNum ended value: " + val);
 		return numNode;
 	}
 
