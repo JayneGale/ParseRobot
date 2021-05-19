@@ -57,8 +57,13 @@ public class OpNode implements RobotProgramNode {
                 break;
             case div:
             case divide:
-                result = (int) (num1 / (double) num2);
-                break;
+                if(num2 == 0){System.err.println("zero divisor" + num2);
+                result = 0;
+                }
+                else{
+                    double num2d = num2;
+                    result = (int) Math.ceil(num1 / num2d);
+                } break;
             default:
                 System.out.println("OpType not found ");
                 break;

@@ -301,7 +301,7 @@ public class Parser {
 		if(!s.hasNext()) {fail("Empty expression on parseSen ", s);}
 		System.out.println("Sen started ");
 		SenNode newSen = new SenNode();
-//		require(OPENPAREN, "no open Paren on Sen", s);
+		//		require(OPENPAREN, "no open Paren on Sen", s);
 		//	SEN   ::= "fuelLeft" | "oppLR" | "oppFB" | "numBarrels" |
 		//			"barrelLR" [ "(" EXP ")" ] | "barrelFB" [ "(" EXP ")" ] | "wallDist"
 		if (s.hasNext(FUELLEFT)) { newSen.setSenType(SenType.fuelLeft);
@@ -309,10 +309,10 @@ public class Parser {
 				require(FUELLEFT, "no token for fuelleft ", s);}
 		//			return parseMove(s);}
 		else if (s.hasNext(OPP_LR)) { newSen.setSenType(SenType.oppLR);
-			newSen.setNum(1);
+//			newSen.setNum(1);
 			require(OPP_LR, "no token for OPP_LR ", s);}
 		else if (s.hasNext(OPP_FB)) { newSen.setSenType(SenType.oppFB);
-			newSen.setNum(1);
+			newSen.getNum();
 			require(OPP_FB, "no token for OPP_FB ", s);}
 		else if (s.hasNext(NUM_BARRELS)) { newSen.setSenType(SenType.numBarrels);
 			newSen.setNum(1); newSen.getNum();

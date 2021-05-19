@@ -11,7 +11,8 @@ public class NumNode implements RobotProgramNode {
     }
 
     public void execute(Robot robot)
-    { setNum(num); }
+    { setNum(num);
+    System.out.println("set num to " + num);}
     public String toString() {
         return "numNode number " + num;
     }

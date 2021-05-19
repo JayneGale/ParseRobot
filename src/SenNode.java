@@ -10,39 +10,52 @@ public class SenNode implements RobotProgramNode {
         return this.senType;
     }
 
-    int inNum;
-    public int outNum;
+    int result;
 
-    public int setNum(int inNum) {
-        this.inNum = inNum;
-        return inNum;
+    public int setNum(int result) {
+        this.result = result;
+        return result;
     }
+
     public int getNum() {
-        this.outNum = outNum;
-        return outNum;
+        this.result = result;
+        return result;
     }
+    int input;
+
+    public void setInput(int input) {
+        this.input = input;
+    }
+    public int getInput() {
+        this.input = input;
+        return input;
+    }
+
 
     public void execute(Robot robot) {
         switch (senType) {
-            case fuelLeft: outNum = robot.getFuel(); break;
-            case oppLR: outNum = robot.getOpponentLR(); break;
-            case oppFB: outNum = robot.getOpponentFB();break;
-            case numBarrels: outNum = robot.numBarrels();break;
-            case barrelLR: outNum = robot.getBarrelLR(inNum);break;
-            case barrelFB: outNum = robot.getBarrelFB(inNum);break;
-            case wallDist: outNum = robot.getDistanceToWall(); break;
+            case fuelLeft: result = robot.getFuel(); break;
+            case oppLR: result = robot.getOpponentLR(); break;
+            case oppFB: result = robot.getOpponentFB();break;
+            case numBarrels: result = robot.numBarrels();break;
+            case barrelLR: result = robot.getBarrelLR(getInput());break;
+            case barrelFB: result = robot.getBarrelFB(getInput());break;
+            case wallDist: result = robot.getDistanceToWall(); break;
             default: System.out.println("SenType not found "); break;
         }
+        System.out.println("SenNode: set " + senType  + " to " + result);
+        System.out.println("SenNode: " + toString());
+        setNum(result);
     }
     public String toString() {
         switch (senType) {
-            case fuelLeft: return "fuelLeft " + outNum;
-            case oppLR: return "oppLR " + outNum;
-            case oppFB:return "oppFB " + outNum;
-            case numBarrels: return "numBarrels " + outNum;
-            case barrelLR: return "barrelLR " + outNum;
-            case barrelFB: return "barrelFB " + outNum;
-            case wallDist: return "wallDist " + outNum;
+            case fuelLeft: return "fuelLeft " + result;
+            case oppLR: return "oppLR " + result;
+            case oppFB:return "oppFB " + result;
+            case numBarrels: return "numBarrels " + result;
+            case barrelLR: return "barrelLR " + result;
+            case barrelFB: return "barrelFB " + result;
+            case wallDist: return "wallDist " + result;
             default: return ("senType enum not found ");
         }
     }
