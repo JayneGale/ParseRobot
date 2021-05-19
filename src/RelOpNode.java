@@ -5,6 +5,10 @@ public class RelOpNode implements RobotProgramNode {        //	calls the relevan
     public void setRelOpType(RelOpType relOpType) {
         this.relOpType = relOpType;
     }
+    public RelOpType getRelOpType() {
+        this.relOpType = relOpType;
+        return relOpType;
+    }
 
     int inNum = 0;
     int inSenValue;

@@ -127,6 +127,7 @@ public class Parser {
 
 // Statement patterns
 	private static final  Pattern IF_PAT = Pattern.compile("if");
+	private static final  Pattern ELSE_PAT = Pattern.compile("else");
 	private static final  Pattern WHILE_PAT = Pattern.compile("while");
 	private static final  Pattern LOOP_PAT = Pattern.compile("loop");
 
@@ -259,14 +260,22 @@ public class Parser {
 	private static RobotProgramNode parseIf(Scanner s) {
 		if (!s.hasNext()) {	fail("Empty expression", s); }
 		System.out.println("214 parseIf started ");
-//		IF    ::= "if" "(" COND ")" BLOCK [ "elif"  "(" COND ")"  BLOCK ]* [ "else" BLOCK ]
+//Stage 2		IF    ::= "if" "(" COND ")" BLOCK [ "else" BLOCK ]
+//Stage 4		IF    ::= "if" "(" COND ")" BLOCK [ "elif"  "(" COND ")"  BLOCK ]* [ "else" BLOCK ]
 		require(IF_PAT, "no if ", s);
 		RobotProgramNode ifNode = new IfNode();
 		if (s.hasNext(OPENPAREN)) { parseCond(s); }
 		else fail ("266 parseWhile no Cond following If ", s);
 		if (s.hasNext(OPENBRACE)){parseBlock(s); }
 		else fail ("parseIf no block following or unknown expression ", s);
+		if(s.hasNext(ELSE_PAT)){
+			//		todo read up on restofif and create an else node/ parseElse
+		};
 		return ifNode;
+	}
+
+	private static RobotProgramNode parseRestOFIf(Scanner s) {
+		return new IfNode();
 	}
 
 	private static RobotProgramNode parseWhile(Scanner s) {
@@ -349,34 +358,50 @@ public class Parser {
 			require(OPENPAREN, "ParseOp missing open paren ", s);
 			exp = parseExpression(s);
 //		RobotProgramNode sen = parseSen(s);
-		System.out.println("ParseOp parse first exp  " + exp.toString());
+		System.out.println("352 ParseOp parse first exp  " + exp.toString());
 		require(",", "parseOp missing comma after first exp ", s);
 		RobotProgramNode exp2 = parseExpression(s);
-		System.out.println("355 ParseOp results " + exp2.toString() );
+		System.out.println("355 ParseOp second expression " + exp2.toString() );
 		require(CLOSEPAREN, "ParseOP missing close paren after exp2 ", s);
-// todo how do I get the two numbers from each numNode and calculate the value for the OpNode
+// TODO how do I get the two numbers from each numNode and calculate the value for the OpNode
 		newOp.calculate(num1, num2);
+		Optype thisOp = newOp.getOpType();
 		int result = newOp.result;
-		System.out.println("355 ParseOp num 1 " + num1 +" num2 " + num2 + " result " + result);
+		System.out.println("360 ParseOp result num 1= " + num1 + " op= " + thisOp.toString() + " num2= " + num2 + " result= " + result);
 		return newOp;
 	}
 	private static RobotProgramNode parseRelOp(Scanner s) {
-		if (!s.hasNext()) {	fail("Empty expression on parseRelop ", s); }
-		if (s.hasNext(CLOSEBRACE)) {	fail("Empty braces on parseRelop ", s); }
-		System.out.println("ParseRelOp started ");
+		if (!s.hasNext()) { fail("Empty expression on parseRelop ", s); }
+		if (s.hasNext(CLOSEPAREN)) { fail("Empty braces on parseRelop ", s); }
+		System.out.println("ParseRelOp starts ");
 		//	RELOP ::= "lt" | "gt" | "eq"
 		RelOpNode relOp = new RelOpNode();
-		if (s.hasNext("lt")) {relOp.setRelOpType(RelOpType.lt); System.out.println("RelOp " + relOp.toString()); require("lt", "missing lt in lt ", s);}
-		else if (s.hasNext("gt")) {relOp.setRelOpType(RelOpType.gt); System.out.println("RelOp " + relOp.toString()); require("gt", "missing gt in lt ", s);}
-		else if (s.hasNext("eq")) {relOp.setRelOpType(RelOpType.eq); System.out.println("RelOp " + relOp.toString()); require("eq", "missing eq in lt ", s);}
+		RobotProgramNode e1 = new ExpNode();
+		RobotProgramNode e2 = new ExpNode();
+		if (s.hasNext("lt")) { relOp.setRelOpType(RelOpType.lt); System.out.println("RelOp " + relOp.toString()); require("lt", "missing lt in lt ", s);}
+		else if (s.hasNext("gt")) { relOp.setRelOpType(RelOpType.gt); System.out.println("RelOp " + relOp.toString()); require("gt", "missing gt in lt ", s);}
+		else if (s.hasNext("eq")) { relOp.setRelOpType(RelOpType.eq); System.out.println("RelOp " + relOp.toString()); require("eq", "missing eq in lt ", s);}
 //		if (s.hasNext(OPENPAREN)) relOp.inSenValue = parseSen(s);
 		require(OPENPAREN, "no open paren on relOp", s);
-		RobotProgramNode sen = parseSen(s);
-		System.out.println("ParseSen result " + sen.toString());
-		require(",", "missing comma in reLop after Sens", s);
-		RobotProgramNode e = parseExpression(s);
-//		RobotProgramNode n = parseNum(s);
-		System.out.println("354 ParseExp result " + e.toString() );
+		if(s.hasNext(EXP_PAT)) {
+			e1 = parseExpression(s);
+			System.out.println("377 ParseExp result " + e1.toString());
+		}
+//		if(s.hasNext(SEN_PAT)){
+//			RobotProgramNode sen = parseSen(s);
+//			System.out.println("ParseSen result " + sen.toString());
+//		}
+//		else if (s.hasNext(NUMPAT)) {
+//			RobotProgramNode num = parseNum(s);
+//			System.out.println("ParseSen result " + num.toString());
+//		}
+		else fail("383 no expression on first relOp num ", s);
+		require(",", "missing comma in reLop after first expression", s);
+		e2 = parseExpression(s);
+//		relOp.setNum(e1.getValue, e2,getValue, relOptype)
+//		boolean result = relOp.calcBool(relOp.getRelOpType(), e1.getNum, e2.getNum);
+//		relOp.setBool(result)
+		System.out.println("354 ParseExp result " + e2.toString() );
 		require(CLOSEPAREN, "missing close paren on relOP after Num ", s);
 		return relOp;
 		}
@@ -401,14 +426,14 @@ public class Parser {
 	}
 		private static RobotProgramNode parseNum (Scanner s){
 			NumNode numNode = new NumNode();
-			System.out.println("parseNum started ");
+			System.out.println("parseNum starts ");
 			int value;
 			if (!s.hasNext()) { fail("Empty expression", s); }
 //		value = Integer.parseInt(s.next());
 			value = requireInt(NUMPAT, "missing integer pattern ", s);
 			numNode.setNum(value);
 			int val = numNode.getNum();
-			System.out.println("parseNum ended value: " + val);
+			System.out.println("parseNum end value: " + val);
 			return numNode;
 		}
 
