@@ -10,11 +10,10 @@ public class SenNode implements RobotProgramNode {
         return this.senType;
     }
 
-    int result;
+    public int result;
 
-    public int setNum(int result) {
+    public void setNum(int result) {
         this.result = result;
-        return result;
     }
 
     public int getNum() {
@@ -30,7 +29,6 @@ public class SenNode implements RobotProgramNode {
         this.input = input;
         return input;
     }
-
 
     public void execute(Robot robot) {
         switch (senType) {

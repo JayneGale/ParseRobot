@@ -223,6 +223,7 @@ public class Parser {
 		System.out.println("230 parseLoop started");
 		require(LOOP_PAT, "no loop ", s);
 //		LOOP  ::= "loop" BLOCK
+		BlockNode block = new BlockNode();
 		if (s.hasNext(OPENBRACE)) {
 			return parseBlock(s);
 //			System.out.println("loop has b: " + b.toString());
@@ -233,7 +234,7 @@ public class Parser {
 //				Addtolist
 //	its now an end }
 	}
-	private static RobotProgramNode parseBlock(Scanner s) {
+	private static BlockNode parseBlock(Scanner s) {
 		if(!s.hasNext()) {fail("Empty expression on block ", s);}
 //		System.out.println("Block started " + s.hasNext());
 //		BLOCK ::= "{" STMT+ "}"
@@ -263,12 +264,13 @@ public class Parser {
 //Stage 2		IF    ::= "if" "(" COND ")" BLOCK [ "else" BLOCK ]
 //Stage 4		IF    ::= "if" "(" COND ")" BLOCK [ "elif"  "(" COND ")"  BLOCK ]* [ "else" BLOCK ]
 		require(IF_PAT, "no if ", s);
-		RobotProgramNode ifNode = new IfNode();
-		boolean ifResult = false;
+		IfNode ifNode = new IfNode();
 		CondNode condNode = new CondNode();
-		if (s.hasNext(OPENPAREN)) { parseCond(s); ifResult = condNode.getCondBool();}
+		BlockNode block = new BlockNode();
+		boolean ifResult = false;
+		if (s.hasNext(OPENPAREN)) {condNode = parseCond(s); ifNode.setIfBool(condNode); ifResult = ifNode.getIfBool() ;}
 		else fail ("266 parseWhile no Cond following If ", s);
-		if (s.hasNext(OPENBRACE)){parseBlock(s); }
+		if (s.hasNext(OPENBRACE)){block = parseBlock(s); ifNode.SetIfBlock(block);}
 		else fail ("parseIf no block following or unknown expression ", s);
 		if(s.hasNext(ELSE_PAT)){
 			//		todo read up on restofif and create an else node/ parseElse
