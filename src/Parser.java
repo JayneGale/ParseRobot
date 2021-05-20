@@ -179,6 +179,7 @@ public class Parser {
 				fail("parseProgram unknown or missing expression ", s);
 			}
 		}
+
 		ProgramNode newP = new ProgramNode();
 		if (nodeTree != null) {
 			System.out.println("183 parseProgram, nodeTree contents: ");
@@ -192,6 +193,7 @@ public class Parser {
 // parse STATEMENTS:
 //	region PARSE STATEMENTS: STMT IF WHILE LOOP BLOCK COND
 	static RobotProgramNode parseStatement (Scanner s){
+		ArrayList<RobotProgramNode> children =  new ArrayList<>();
 		if(!s.hasNext()) {fail("Empty expression", s);}
 		System.out.println("181 parseStatement started");
 
@@ -348,10 +350,10 @@ public class Parser {
 	private static RobotProgramNode parseOp(Scanner s) {
 //	OP   ::= "add" | "sub" | "mul" | "div"
 		if(!s.hasNext()) {fail("Empty expression on parseSen ", s);}
-		OpNode newOp = new OpNode();
-		RobotProgramNode exp = new ExpNode();
-		int num1 = 0;
-		int num2 = 0;
+		RobotProgramNode leftNum = null;
+		RobotProgramNode rightNum = null;
+		OpNode newOp = new OpNode(leftNum,rightNum);
+//		RobotProgramNode exp = new ExpNode();
 		if (s.hasNext(ADDPAT)) { newOp.setOpType(Optype.add);
 			require(ADDPAT, "ParseOp no token for add ", s); }
 		else if (s.hasNext(SUBPAT)) { newOp.setOpType(Optype.add);
@@ -362,18 +364,18 @@ public class Parser {
 			require(DIVPAT, "ParseOp no token for div ", s);}
 		else fail ("ParseOp unrecognised operator ", s);
 			require(OPENPAREN, "ParseOp missing open paren ", s);
-			exp = parseExpression(s);
+		leftNum = parseExpression(s);
 //		RobotProgramNode sen = parseSen(s);
-		System.out.println("352 ParseOp parse first exp  " + exp.toString());
+		System.out.println("352 ParseOp parse first exp  " + leftNum.toString());
 		require(",", "parseOp missing comma after first exp ", s);
-		RobotProgramNode exp2 = parseExpression(s);
-		System.out.println("355 ParseOp second expression " + exp2.toString() );
+		rightNum = parseExpression(s);
+		System.out.println("355 ParseOp second expression " + rightNum.toString() );
 		require(CLOSEPAREN, "ParseOP missing close paren after exp2 ", s);
 // TODO how do I get the two numbers from each numNode and calculate the value for the OpNode
-		newOp.calculate(num1, num2);
+//		newOp.calculate(leftNum, rightNum);
 		Optype thisOp = newOp.getOpType();
 		int result = newOp.result;
-		System.out.println("360 ParseOp result num 1= " + num1 + " op= " + thisOp.toString() + " num2= " + num2 + " result= " + result);
+		System.out.println("360 ParseOp result num 1= " + leftNum + " op= " + thisOp.toString() + " rightNum= " + rightNum + " result= " + result);
 		return newOp;
 	}
 	private static RobotProgramNode parseRelOp(Scanner s) {
@@ -416,54 +418,54 @@ public class Parser {
 //	EXP   ::= NUM | SEN | VAR | OP "(" EXP "," EXP ")"
 		if (!s.hasNext()) { fail("empty string", s); }
 		System.out.println("parseExp started ");
-		ExpNode expNode = new ExpNode();
 //		EXP   ::= NUM | SEN | OP "(" EXP "," EXP ")"
-		if(s.hasNext(NUMPAT)){expNode.setExpType(ExpType.num);System.out.println("Exp Num " + expNode.toString() + " result " + expNode.getResult());parseNum(s);}
-		else if(s.hasNext(SEN_PAT)){expNode.setExpType(ExpType.sen);System.out.println("Exp Sen " + expNode.toString()+ " result " + expNode.getResult()); parseSen(s);}
-		else if(s.hasNext(OP_PAT)){expNode.setExpType(ExpType.op);System.out.println("Exp op " + expNode.toString() +  " result " + expNode.getResult()); parseOp(s);}
-//		else if(s.hasNext(MULPAT)){System.out.println("Factor operator multiply " + expNode.toString()); parseNum(s);}
-//		else if(s.hasNext(DIVPAT)){System.out.println("Factor operator divide " + expNode.toString()); parseNum(s);}
+		if(s.hasNext(NUMPAT)){System.out.println("Exp returns Num ");  return parseNum(s);}
+		else if(s.hasNext(SEN_PAT)){System.out.println("Exp returns Sen ");  return parseSen(s);}
+		else if(s.hasNext(OP_PAT)){System.out.println("Exp returns Op ");  return parseOp(s);}
+		//		ExpNode expNode = new ExpNode();
+//		if(s.hasNext(NUMPAT)){expNode.setExpType(ExpType.num);System.out.println("Exp Num " + expNode.toString() + " result " + expNode.getResult());parseNum(s);}
+//		else if(s.hasNext(SEN_PAT)){expNode.setExpType(ExpType.sen);System.out.println("Exp Sen " + expNode.toString()+ " result " + expNode.getResult()); parseSen(s);}
+//		else if(s.hasNext(OP_PAT)){expNode.setExpType(ExpType.op);System.out.println("Exp op " + expNode.toString() +  " result " + expNode.getResult()); parseOp(s);}
+
+//		else if(s.hasNext(MULPAT)){System.out.println("Factor operator multiply " + expNode.toString()); return parseNum(s);}
+//		else if(s.hasNext(DIVPAT)){System.out.println("Factor operator divide " + expNode.toString()); return parseNum(s);}
 //		else if(s.hasNext(ADDPAT)|s.hasNext(SUBPAT)){System.out.println("Exp " + expNode.toString()); parseTerms(s);}
 //		else if(s.hasNext(MULPAT)| s.hasNext(DIVPAT) | s.hasNext(OPENPAREN)){System.out.println("Exp " + expNode.toString()); parseFactors(s);}
 //		else if(s.hasNext(OPENPAREN)){expNode.setExpType(ExpType.openParen); System.out.println("Factor infix add " + expNode.toString()); parseExpression(s);}
 		else fail("p374 parseExp Unrecognised expression ", s);
 //		value = Integer.parseInt(s.next());
-		return expNode;
+		return null;
 	}
 		private static RobotProgramNode parseNum (Scanner s){
-			NumNode numNode = new NumNode();
-			System.out.println("parseNum starts ");
-			int value;
+//			System.out.println("parseNum starts ");
 			if (!s.hasNext()) { fail("Empty expression", s); }
-//		value = Integer.parseInt(s.next());
-			value = requireInt(NUMPAT, "missing integer pattern ", s);
-			numNode.setNum(value);
-			int val = numNode.getNum();
-			System.out.println("parseNum end value: " + val);
-			return numNode;
+//			if(!s.hasNext(NUMPAT)){fail ("expecting an integer", s);}
+			int value = requireInt(NUMPAT, "missing integer pattern ", s);
+			System.out.println("parseNum value: " + value);
+			return new NumNode(value);
 		}
 
-	private static RobotProgramNode parseTerms(Scanner s) {
-		if (!s.hasNext()) { fail("Empty expression", s); }
-		NumNode termNode = new NumNode();
-		if(s.hasNext(ADDPAT)){System.out.println("Term operator add " + termNode.toString()); parseNum(s);}
-		else if(s.hasNext(SUBPAT)){System.out.println("Term operator sub " + termNode.toString()); parseNum(s);}
-		if(s.hasNext(MULPAT)){System.out.println("Factor operator multiply " + termNode.toString()); parseNum(s);}
-		if(s.hasNext(DIVPAT)){System.out.println("Factor operator divide " + termNode.toString()); parseNum(s);}
-		if(s.hasNext(OPENPAREN)){System.out.println("Factor infix add " + termNode.toString()); parseNum(s);}
-		else fail("parseTerms Unrecognised expression ", s);
-		return termNode;
-	}
-	private static RobotProgramNode parseFactors(Scanner s) {
-		if (!s.hasNext()) { fail("Empty expression", s); }
-		NumNode factorNode = new NumNode();
-		if(s.hasNext(MULPAT)){System.out.println("Factor operator multiply " + factorNode.toString()); parseNum(s);}
-		if(s.hasNext(DIVPAT)){System.out.println("Factor operator divide " + factorNode.toString()); parseNum(s);}
-		if(s.hasNext(OPENPAREN)){System.out.println("Factor infix add " + factorNode.toString()); parseNum(s);}
-		else fail("parseFactors Unrecognised expression ", s);
-
-		return factorNode;
-	}
+//	private static RobotProgramNode parseTerms(Scanner s) {
+//		if (!s.hasNext()) { fail("Empty expression", s); }
+//		NumNode termNode = new NumNode();
+//		if(s.hasNext(ADDPAT)){System.out.println("Term operator add " + termNode.toString()); parseNum(s);}
+//		else if(s.hasNext(SUBPAT)){System.out.println("Term operator sub " + termNode.toString()); parseNum(s);}
+//		if(s.hasNext(MULPAT)){System.out.println("Factor operator multiply " + termNode.toString()); parseNum(s);}
+//		if(s.hasNext(DIVPAT)){System.out.println("Factor operator divide " + termNode.toString()); parseNum(s);}
+//		if(s.hasNext(OPENPAREN)){System.out.println("Factor infix add " + termNode.toString()); parseNum(s);}
+//		else fail("parseTerms Unrecognised expression ", s);
+//		return termNode;
+//	}
+//	private static RobotProgramNode parseFactors(Scanner s) {
+//		if (!s.hasNext()) { fail("Empty expression", s); }
+//		NumNode factorNode = new NumNode();
+//		if(s.hasNext(MULPAT)){System.out.println("Factor operator multiply " + factorNode.toString()); parseNum(s);}
+//		if(s.hasNext(DIVPAT)){System.out.println("Factor operator divide " + factorNode.toString()); parseNum(s);}
+//		if(s.hasNext(OPENPAREN)){System.out.println("Factor infix add " + factorNode.toString()); parseNum(s);}
+//		else fail("parseFactors Unrecognised expression ", s);
+//
+//		return factorNode;
+//	}
 
 // endregion
 

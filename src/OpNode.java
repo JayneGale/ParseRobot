@@ -3,6 +3,13 @@ public class OpNode implements RobotProgramNode {
 // Stage 4   OP    ::= "+" | "-" | "*" | "/"
 
     Optype opType;
+    private RobotProgramNode leftNum, rightNum;
+
+    public OpNode(RobotProgramNode lt, RobotProgramNode rt){
+        leftNum = lt;
+        rightNum = rt;
+    }
+
     int num1;
     int num2;
     int result;
@@ -73,21 +80,21 @@ public class OpNode implements RobotProgramNode {
     public String toString() {
         switch (opType) {
             case add:
-                return num1 + " add " + num2 + " is " + result;
+                return leftNum + " add " + rightNum + " is " + result;
             case sub:
-                return num1 + " sub " + num2 + " is " + result;
+                return leftNum + " sub " + rightNum + " is " + result;
             case mul:
-                return num1 + " mul " + num2 + " is " + result;
+                return leftNum + " mul " + rightNum + " is " + result;
             case div:
-                return num1 + " div " + num2 + " is " + result;
+                return leftNum + " div " + rightNum + " is " + result;
             case plus:
-                return num1 + " + " + num2 + " is " + result;
+                return leftNum + " + " + rightNum + " is " + result;
             case minus:
-                return num1 + " - " + num2 + " is " + result;
+                return leftNum + " - " + rightNum + " is " + result;
             case times:
-                return num1 + " * " + num2 + " is " + result;
+                return leftNum + " * " + rightNum + " is " + result;
             case divide:
-                return num1 + " / " + num2 + " is " + result;
+                return leftNum + " / " + rightNum + " is " + result;
             default:
                 return ("OpType enum not found ");
         }

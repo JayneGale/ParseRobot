@@ -1,5 +1,8 @@
 public class NumNode implements RobotProgramNode {
-    public int num = 0;
+    private int num;
+    public NumNode(int num){
+        this.num = num;
+    }
 //    NUM   ::= "-?[1-9][0-9]*|0"
 
     public void setNum (int num) {
