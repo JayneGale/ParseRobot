@@ -239,21 +239,21 @@ public class Parser {
 //		BLOCK ::= "{" STMT+ "}"
 		require(OPENBRACE, "no open brace on block ", s);
 		if(s.hasNext(CLOSEBRACE)) {fail("nothing between the block braces ", s);}
-		ArrayList<RobotProgramNode> loopTree = new ArrayList<>();
+		ArrayList<RobotProgramNode> blockTree = new ArrayList<>();
 		BlockNode newBL = new BlockNode();
 		while(s.hasNext(ACT_PAT) || s.hasNext(LOOP_PAT) || s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT))   {
 			RobotProgramNode b = parseStatement(s);
-			loopTree.add(b);
+			blockTree.add(b);
 			System.out.println("244 parseBlock loopTree actions: " + b.toString());
 		}
 		require(CLOSEBRACE, "246 no close brace on block ", s);
-		if (loopTree != null) {
-			for (RobotProgramNode n : loopTree) {
+		if (blockTree != null) {
+			for (RobotProgramNode n : blockTree) {
 				newBL.addToBlock(n);
-				System.out.println("250 parseBlock loopTree toString " + n.toString());
+				System.out.println("250 parseBlock blockTree toString " + n.toString());
 			}
 		}
-		System.out.println("253 parseBlock return newBL loopTree.size: "  + loopTree.size() + " newBL size: " + newBL.blockList.size());
+		System.out.println("253 parseBlock return newBL blockTree.size: "  + blockTree.size() + " newBL size: " + newBL.blockList.size());
 		return newBL;
 	}
 
@@ -264,7 +264,9 @@ public class Parser {
 //Stage 4		IF    ::= "if" "(" COND ")" BLOCK [ "elif"  "(" COND ")"  BLOCK ]* [ "else" BLOCK ]
 		require(IF_PAT, "no if ", s);
 		RobotProgramNode ifNode = new IfNode();
-		if (s.hasNext(OPENPAREN)) { parseCond(s); }
+		boolean ifResult = false;
+		CondNode condNode = new CondNode();
+		if (s.hasNext(OPENPAREN)) { parseCond(s); ifResult = condNode.getCondBool();}
 		else fail ("266 parseWhile no Cond following If ", s);
 		if (s.hasNext(OPENBRACE)){parseBlock(s); }
 		else fail ("parseIf no block following or unknown expression ", s);
@@ -292,12 +294,14 @@ public class Parser {
 		return whileNode;
 	}
 
-	private static RobotProgramNode parseCond(Scanner s) {
+	private static CondNode parseCond(Scanner s) {
+//	    true or false RobotBool
+
 		if(!s.hasNext()) {fail("Empty expression on parsCond ", s);}
 		System.out.println("Cond started " + s.hasNext());
 		require(OPENPAREN, "no open bracket on condition ", s);
 		if(s.hasNext(CLOSEPAREN)) {fail("no condition between brackets ", s);}
-		RobotProgramNode condNode = new CondNode();
+		CondNode condNode = new CondNode();
 		if(s.hasNext(COND_PAT)) parseRelOp(s);
 		else fail ("293 parseCond: no RelOp following open paren ", s);
 //		Stage 1 COND  ::= RELOP "(" SEN "," NUM ")
