@@ -1,5 +1,9 @@
 public class RelOpNode implements RobotProgramNode {        //	calls the relevant Sensory methods in Robot
+
     public RelOpType relOpType;
+    public RobotProgramNode exp1;
+    public RobotProgramNode exp2;
+
     public String toString() {
         return switch (relOpType) {
             case lt -> " lt ";
@@ -8,6 +12,7 @@ public class RelOpNode implements RobotProgramNode {        //	calls the relevan
             default -> ("relOpType enum not found ");
         };
     }
+
         public void execute(Robot robot) {
     }
 }

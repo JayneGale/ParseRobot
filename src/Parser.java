@@ -318,6 +318,7 @@ public class Parser {
 		//		Stage 1 COND  ::= RELOP "(" SEN "," NUM ")
 //		COND  ::= RELOP "(" EXP "," EXP ")"  | and ( COND, COND ) | or ( COND, COND )  | not ( COND )
 //		RELOP ::= "lt" | "gt" | "eq"
+
 		condNode.condBool = condNode.evaluateCond(relop.relOpType, condNode.exp1, condNode.exp2);
 		require(CLOSEPAREN, "298 no close paren on Cond ", s);
 		return condNode;
@@ -349,6 +350,7 @@ public class Parser {
 		else fail ("parseSen unknown or missing senType ", s);
 		newSen.senType = senType;
 		int value = newSen.result;
+		System.out.println("353 parseSen returns " + value);
 		return senNode;
 	}
 
@@ -387,16 +389,35 @@ public class Parser {
 		//	RELOP ::= "lt" | "gt" | "eq"
 		RelOpNode relOp = new RelOpNode();
 		RelOpType relOpType = RelOpType.eq;
+		if (s.hasNext("lt")) { relOpType = RelOpType.lt; require("lt", "missing lt in lt ", s);}
+		else if (s.hasNext("gt")) { relOpType = RelOpType.gt; require("gt", "missing gt in lt ", s);}
+		else if (s.hasNext("eq")) { relOpType = RelOpType.eq; require("eq", "missing eq in lt ", s);}
+		relOp.relOpType = relOpType;
+		System.out.println("RelOp " + relOp.toString());
+		require(OPENPAREN, "no open paren on relOp", s);
 		RobotProgramNode e1 = new ExpNode();
 		RobotProgramNode e2 = new ExpNode();
-		if (s.hasNext("lt")) { relOpType = RelOpType.lt; System.out.println("RelOp " + relOp.toString()); require("lt", "missing lt in lt ", s);}
-		else if (s.hasNext("gt")) { relOpType = RelOpType.gt; System.out.println("RelOp " + relOp.toString()); require("gt", "missing gt in lt ", s);}
-		else if (s.hasNext("eq")) { relOpType = RelOpType.eq; System.out.println("RelOp " + relOp.toString()); require("eq", "missing eq in lt ", s);}
-		relOp.relOpType = relOpType;
-		require(OPENPAREN, "no open paren on relOp", s);
 		if(s.hasNext(EXP_PAT)) {
 			e1 = parseExpression(s);
-			System.out.println("377 ParseExp result " + e1.toString());
+			System.out.println("401 ParseExp1 ");
+		}
+		else fail("383 no expression on first relOp num ", s);
+		require(",", "missing comma in reLop after expression 1 left", s);
+		if(s.hasNext(EXP_PAT)) {
+			e2 = parseExpression(s);
+			System.out.println("407 ParseExp2 ");
+		}
+		relOp.exp1 = e1;
+		relOp.exp2 = e2;
+//		relOp.setNum(e1.getValue, e2,getValue, relOptype)
+//		boolean result = relOp.calcBool(relOp.getRelOpType(), e1.getNum, e2.getNum);
+//		relOp.setBool(result)
+		System.out.println("416 ParseExp result ");
+//		if(e1 != null && e2 != null){
+//			System.out.println("377 ParseExp" + e1.toString() + e2.toString());
+//		}
+		require(CLOSEPAREN, "missing close paren on relOP after expression 2 right ", s);
+		return relOp;
 		}
 //		if(s.hasNext(SEN_PAT)){
 //			RobotProgramNode sen = parseSen(s);
@@ -406,16 +427,6 @@ public class Parser {
 //			RobotProgramNode num = parseNum(s);
 //			System.out.println("ParseSen result " + num.toString());
 //		}
-		else fail("383 no expression on first relOp num ", s);
-		require(",", "missing comma in reLop after expression 1 left", s);
-		e2 = parseExpression(s);
-//		relOp.setNum(e1.getValue, e2,getValue, relOptype)
-//		boolean result = relOp.calcBool(relOp.getRelOpType(), e1.getNum, e2.getNum);
-//		relOp.setBool(result)
-		System.out.println("354 ParseExp result " + e2.toString() );
-		require(CLOSEPAREN, "missing close paren on relOP after expression 2 right ", s);
-		return relOp;
-		}
 
 	private static RobotProgramNode parseExpression(Scanner s) {
 //	EXP   ::= NUM | SEN | VAR | OP "(" EXP "," EXP ")"
