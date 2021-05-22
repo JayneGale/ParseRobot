@@ -1,22 +1,20 @@
 public class NumNode implements RobotProgramNode {
-    private int num;
-    public NumNode(int num){
-        this.num = num;
+    private int number;
+    public NumNode(int number){
+        this.number = number;
     }
-//    NUM   ::= "-?[1-9][0-9]*|0"
-
-    public void setNum (int num) {
-        this.num = num;
-    }
-    public int getNum () {
-        this.num = num;
-        return num;
-    }
-
-    public void execute(Robot robot)
-    {setNum(num);
-    System.out.println("set num to " + num);}
+    public void execute(Robot robot){ System.out.println("set num to " + number);}
     public String toString() {
-        return "numNode number " + num;
+        return "numNode number " + number;
     }
 }
+//    NUM   ::= "-?[1-9][0-9]*|0"
+
+//    public void setNum (int num) {
+//        this.num = num;
+//    }
+//    public int getNum () {
+//        this.num = num;
+//        return num;
+//    }
+

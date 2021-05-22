@@ -1,5 +1,8 @@
+import java.util.ArrayList;
+
 public class ExpNode implements RobotProgramNode {
     public ExpType expType;
+
 //    EXP   ::= NUM | SEN | OP "(" EXP "," EXP ")"
     public void setExpType(ExpType expType) {
         this.expType = expType;
@@ -12,7 +15,7 @@ public class ExpNode implements RobotProgramNode {
         switch (expType) {
             case num:
                 NumNode n = new NumNode();
-                result = n.getNum(); break;
+//                result = n.getNum(); break;
             case sen:
                 SenNode s = new SenNode();
                 result = s.getNum();

@@ -5,7 +5,8 @@ public class OpNode implements RobotProgramNode {
     Optype opType;
     private RobotProgramNode leftNum, rightNum;
 
-    public OpNode(RobotProgramNode lt, RobotProgramNode rt){
+    public OpNode(Optype optype, RobotProgramNode lt, RobotProgramNode rt){
+        this.opType = optype;
         leftNum = lt;
         rightNum = rt;
     }

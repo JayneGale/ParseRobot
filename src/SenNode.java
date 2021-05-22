@@ -1,15 +1,8 @@
 public class SenNode implements RobotProgramNode {
     //	calls the relevant Sensory methods in Robot
+
+    //	an enum for the different sense types
     public SenType senType;
-
-    //	create an enum to set the different sense types
-    public void setSenType(SenType senType) {
-        this.senType = senType;
-    }
-    public SenType getSenType() {
-        return this.senType;
-    }
-
     public int result;
 
     public void setNum(int result) {
@@ -20,42 +13,46 @@ public class SenNode implements RobotProgramNode {
         this.result = result;
         return result;
     }
-    int input;
-
-    public void setInput(int input) {
-        this.input = input;
+//    this is for getbarrelFB and LR which gets the distance to the nth barrel away
+//    just for this phase let's set it to 1
+    int n = 1;
+    public void setTargetBarrel(int input) {
+        n = input;
     }
-    public int getInput() {
-        this.input = input;
-        return input;
+    public int getTargetBarrel() {
+        return n;
     }
-
     public void execute(Robot robot) {
         switch (senType) {
-            case fuelLeft: result = robot.getFuel(); break;
-            case oppLR: result = robot.getOpponentLR(); break;
-            case oppFB: result = robot.getOpponentFB();break;
-            case numBarrels: result = robot.numBarrels();break;
-            case barrelLR: result = robot.getBarrelLR(getInput());break;
-            case barrelFB: result = robot.getBarrelFB(getInput());break;
-            case wallDist: result = robot.getDistanceToWall(); break;
-            default: System.out.println("SenType not found "); break;
+            case fuelLeft -> result = robot.getFuel();
+            case oppLR -> result = robot.getOpponentLR();
+            case oppFB -> result = robot.getOpponentFB();
+            case numBarrels -> result = robot.numBarrels();
+            case barrelLR -> result = robot.getBarrelLR(getTargetBarrel());
+            case barrelFB -> result = robot.getBarrelFB(getTargetBarrel());
+            case wallDist -> result = robot.getDistanceToWall();
+            default -> System.out.println("SenType not found ");
         }
-        System.out.println("SenNode: set " + senType  + " to " + result);
-        System.out.println("SenNode: " + toString());
         setNum(result);
+        System.out.println("SenNode: " + senType  + " = " + result);
     }
     public String toString() {
-        switch (senType) {
-            case fuelLeft: return "fuelLeft " + result;
-            case oppLR: return "oppLR " + result;
-            case oppFB:return "oppFB " + result;
-            case numBarrels: return "numBarrels " + result;
-            case barrelLR: return "barrelLR " + result;
-            case barrelFB: return "barrelFB " + result;
-            case wallDist: return "wallDist " + result;
-            default: return ("senType enum not found ");
-        }
+        return switch (senType) {
+            case fuelLeft -> "fuelLeft " + result;
+            case oppLR -> "oppLR " + result;
+            case oppFB -> "oppFB " + result;
+            case numBarrels -> "numBarrels " + result;
+            case barrelLR -> "barrelLR " + result;
+            case barrelFB -> "barrelFB " + result;
+            case wallDist -> "wallDist " + result;
+            default -> ("senType enum not found ");
+        };
     }
 
 }
+//    public void setSenType(SenType senType) {
+//        this.senType = senType;
+//    }
+//    public SenType getSenType() {
+//        return this.senType;
+//    }

@@ -1,23 +1,20 @@
 public class CondNode implements RobotProgramNode{
 
-public Boolean condBool = false;
-public RelOpType relOpType = null;
+public Boolean condBool;
+public RelOpType relOpType;
 
 public void setRelOpType(RelOpNode r) {
-//    ToDo make parseRelop return a relopNode
         relOpType = r.relOpType;
     }
 
 public int exp1 = 0;
 public int exp2 = 0;
-public void setExp1(ExpNode e) {
-//    ToDo make parseExp return a ExpNode
-        exp1 = e.getResult();
-    }
-public void setExp2(ExpNode e) {
-//    ToDo make parseExp return a ExpNode
-        exp2 = e.getResult();
-    }
+//public void setExp1(ExpNode e) {
+//        exp1 = e.getResult();
+//    }
+//public void setExp2(ExpNode e) {
+//        exp2 = e.getResult();
+//    }
 
 public boolean evaluateCond(RelOpType reloptype, int exp1, int exp2){
         this.relOpType = reloptype;
@@ -39,9 +36,6 @@ public boolean evaluateCond(RelOpType reloptype, int exp1, int exp2){
 //Stage 2    COND  ::= RELOP "(" SEN "," NUM ")"
 //    Stage 2 implement RELOP "(" EXP "," EXP ")"
 
-    public void setCondBool(RelOpNode relOp) {
-        condBool = relOp.relOpBool;
-    }
     public Boolean getCondBool() {
         return condBool;
     }
@@ -50,7 +44,10 @@ public boolean evaluateCond(RelOpType reloptype, int exp1, int exp2){
             return ("CondNode : boolResult " + condBool);
     }
     public void execute(Robot robot){
-      		execute(robot);
+    System.out.println("eval Cond" + relOpType + exp2 + exp2);
+    boolean condition = evaluateCond(relOpType, exp1, exp2);
+
+        if(condition) execute(robot);
         //		evaluate the CondNode elements to execute actually I need a different ActNode that is a RobotProgrammeNode
     }
 }

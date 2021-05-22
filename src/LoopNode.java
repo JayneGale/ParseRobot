@@ -1,11 +1,6 @@
 import java.util.ArrayList;
 
 public class LoopNode implements RobotProgramNode{
-//    ArrayList<RobotProgramNode> loopTree = new ArrayList<>();
-//
-//    public void addToBlock(RobotProgramNode b) {
-//        loopTree.add(b);
-//    }
     public String toString() {
 //        return "LoopNode: loopTree size " + loopTree.size();
                 return "LoopNode: loopTree without size ";
@@ -15,7 +10,7 @@ public class LoopNode implements RobotProgramNode{
         // run thru to block list and execute each in turn
         while (true) {
             execute(robot);
-            //			Arraylist of robot statements
+//			Arraylist of robot statements
 //            for (RobotProgramNode n : loopTree) {
 //                n.execute(robot);
 //            }

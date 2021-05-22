@@ -164,12 +164,14 @@ public class Parser {
 
 //		 scan for a
 //		 statement (action, loop, if, while )
-
-//		 relative operation (gt, lt, equals)
+//		 action (move turn_l etc)
+// 	Not done yet
 //		 variable (var)
+
+//	Not needed at Program level
+//		 relative operation (gt, lt, equals)
 //		 operation (add (terms), multiply(factors), etc)
 //		 term factor or number
-//		 action (move turn_l etc)
 
 		while (s.hasNext()) {
 			if (s.hasNext(ACT_PAT) || s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)
@@ -247,7 +249,7 @@ public class Parser {
 		while(s.hasNext(ACT_PAT) || s.hasNext(LOOP_PAT) || s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT))   {
 			RobotProgramNode b = parseStatement(s);
 			blockTree.add(b);
-			System.out.println("244 parseBlock loopTree actions: " + b.toString());
+			System.out.println("244 parseBlock blockTree actions: " + b.toString());
 		}
 		require(CLOSEBRACE, "246 no close brace on block ", s);
 		if (blockTree != null) {
@@ -266,130 +268,131 @@ public class Parser {
 //Stage 2		IF    ::= "if" "(" COND ")" BLOCK [ "else" BLOCK ]
 //Stage 4		IF    ::= "if" "(" COND ")" BLOCK [ "elif"  "(" COND ")"  BLOCK ]* [ "else" BLOCK ]
 		require(IF_PAT, "no if ", s);
-		IfNode ifNode = new IfNode();
-		CondNode condNode = new CondNode();
-		BlockNode block = new BlockNode();
-		boolean ifResult = false;
-		if (s.hasNext(OPENPAREN)) {condNode = parseCond(s); ifNode.setIfBool(condNode); ifResult = ifNode.getIfBool() ;}
+		IfNode newIf = new IfNode();
+		CondNode newCond = new CondNode();
+		BlockNode newBl = new BlockNode();
+		if (s.hasNext(OPENPAREN)) {newCond = parseCond(s); }
 		else fail ("266 parseWhile no Cond following If ", s);
-		if (s.hasNext(OPENBRACE)){block = parseBlock(s); ifNode.SetIfBlock(block);}
+
+		if (s.hasNext(OPENBRACE)){newBl = parseBlock(s); }
 		else fail ("parseIf no block following or unknown expression ", s);
 		if(s.hasNext(ELSE_PAT)){
 			//		todo read up on restofif and create an else node/ parseElse
-		};
-		return ifNode;
+		}
+		newIf.cond = newCond;
+		newIf.block = newBl;
+		return newIf;
 	}
 
 	private static RobotProgramNode parseRestOFIf(Scanner s) {
 		return new IfNode();
 	}
 
-	private static RobotProgramNode parseWhile(Scanner s) {
+	private static WhileNode parseWhile(Scanner s) {
 		if (!s.hasNext()) {	fail("Empty expression", s); }
 		System.out.println("274 parseWhile started " + s.hasNext());
 		//		WHILE ::= "while" "(" COND ")" BLOCK (= {})
 		require(WHILE_PAT, "no while ", s);
-		RobotProgramNode whileNode = new WhileNode();
-		if (s.hasNext(OPENPAREN)) {parseCond(s);}
+		WhileNode newWhile = new WhileNode();
+		CondNode newCond = new CondNode();
+		BlockNode newBl = new BlockNode();
+		if (s.hasNext(OPENPAREN)) { newCond = parseCond(s);}
 		else fail ("parseWhile no Cond following While ", s);
-//		require(CLOSEPAREN, "279 missing close brace on While ", s);
-		if (s.hasNext(OPENBRACE)){parseBlock(s); }
+		if (s.hasNext(OPENBRACE)){newBl = parseBlock(s); }
 		else fail ("parseWhile no block following or unknown expression ", s);
-		return whileNode;
+		newWhile.cond = newCond;
+		newWhile.block = newBl;
+		return newWhile;
 	}
 
 	private static CondNode parseCond(Scanner s) {
 //	    true or false RobotBool
-
 		if(!s.hasNext()) {fail("Empty expression on parsCond ", s);}
 		System.out.println("Cond started " + s.hasNext());
 		require(OPENPAREN, "no open bracket on condition ", s);
 		if(s.hasNext(CLOSEPAREN)) {fail("no condition between brackets ", s);}
 		CondNode condNode = new CondNode();
-		if(s.hasNext(COND_PAT)) parseRelOp(s);
+		RelOpNode relop = new RelOpNode();
+		if(s.hasNext(COND_PAT)) relop = parseRelOp(s);
 		else fail ("293 parseCond: no RelOp following open paren ", s);
-//		Stage 1 COND  ::= RELOP "(" SEN "," NUM ")
+		//		Stage 1 COND  ::= RELOP "(" SEN "," NUM ")
 //		COND  ::= RELOP "(" EXP "," EXP ")"  | and ( COND, COND ) | or ( COND, COND )  | not ( COND )
 //		RELOP ::= "lt" | "gt" | "eq"
+		condNode.condBool = condNode.evaluateCond(relop.relOpType, condNode.exp1, condNode.exp2);
 		require(CLOSEPAREN, "298 no close paren on Cond ", s);
 		return condNode;
 	}
 	private static RobotProgramNode parseSen(Scanner s) {
 		if(!s.hasNext()) {fail("Empty expression on parseSen ", s);}
 		System.out.println("Sen started ");
+		RobotProgramNode senNode = new SenNode();
 		SenNode newSen = new SenNode();
-		//		require(OPENPAREN, "no open Paren on Sen", s);
+		SenType senType = SenType.fuelLeft;
 		//	SEN   ::= "fuelLeft" | "oppLR" | "oppFB" | "numBarrels" |
 		//			"barrelLR" [ "(" EXP ")" ] | "barrelFB" [ "(" EXP ")" ] | "wallDist"
-		if (s.hasNext(FUELLEFT)) { newSen.setSenType(SenType.fuelLeft);
-				newSen.setNum(1);
+		if (s.hasNext(FUELLEFT)) { senType = SenType.fuelLeft;
 				require(FUELLEFT, "no token for fuelleft ", s);}
-		//			return parseMove(s);}
-		else if (s.hasNext(OPP_LR)) { newSen.setSenType(SenType.oppLR);
-//			newSen.setNum(1);
+//		else if (s.hasNext(OPP_LR)) { newSen.setSenType(SenType.oppLR);
+//			require(OPP_LR, "no token for OPP_LR ", s);}
+		else if (s.hasNext(OPP_LR)) { senType = SenType.oppLR;
 			require(OPP_LR, "no token for OPP_LR ", s);}
-		else if (s.hasNext(OPP_FB)) { newSen.setSenType(SenType.oppFB);
-			newSen.getNum();
+		else if (s.hasNext(OPP_FB)) { senType = SenType.oppFB;
 			require(OPP_FB, "no token for OPP_FB ", s);}
-		else if (s.hasNext(NUM_BARRELS)) { newSen.setSenType(SenType.numBarrels);
-			newSen.setNum(1); newSen.getNum();
+		else if (s.hasNext(NUM_BARRELS)) { senType = SenType.numBarrels;
 			require(NUM_BARRELS, "no token for numBarrels ", s);}
-		else if (s.hasNext(BARRELLR)) { newSen.setSenType(SenType.barrelLR);
-			newSen.setNum(1);
+		else if (s.hasNext(BARRELLR)) { senType = SenType.barrelLR;
 			require(BARRELLR, "no token for barrelLR ", s);}
-		else if (s.hasNext(BARRELFB)) { newSen.setSenType(SenType.barrelFB);
-			newSen.setNum(1);
+		else if (s.hasNext(BARRELFB)) { senType = SenType.barrelFB;
 			require(BARRELFB, "no token for barrelFB ", s);}
-		else if (s.hasNext(WALLDIST)) { newSen.setSenType(SenType.wallDist);
-			newSen.setNum(1);
+		else if (s.hasNext(WALLDIST)) { senType = SenType.wallDist;
 			require(WALLDIST, "no token for wallDist ", s);}
 		else fail ("parseSen unknown or missing senType ", s);
-		return newSen;
+		newSen.senType = senType;
+		int value = newSen.result;
+		return senNode;
 	}
 
 	private static RobotProgramNode parseOp(Scanner s) {
 //	OP   ::= "add" | "sub" | "mul" | "div"
 		if(!s.hasNext()) {fail("Empty expression on parseSen ", s);}
-		RobotProgramNode leftNum = null;
-		RobotProgramNode rightNum = null;
-		OpNode newOp = new OpNode(leftNum,rightNum);
-//		RobotProgramNode exp = new ExpNode();
-		if (s.hasNext(ADDPAT)) { newOp.setOpType(Optype.add);
-			require(ADDPAT, "ParseOp no token for add ", s); }
-		else if (s.hasNext(SUBPAT)) { newOp.setOpType(Optype.add);
+		Optype optype = null;
+		if (s.hasNext(ADDPAT)) { optype = Optype.add;
+			require(ADDPAT, "ParseOp no token for add ", s);}
+		else if (s.hasNext(SUBPAT)) { optype = Optype.sub;
 			require(SUBPAT, "ParseOp no token for sub ", s);}
-		else if (s.hasNext(MULPAT)) { newOp.setOpType(Optype.mul);
+		else if (s.hasNext(MULPAT)) { optype = Optype.mul;
 			require(MULPAT, "ParseOp no token for mul ", s);}
-		else if (s.hasNext(DIVPAT)) { newOp.setOpType(Optype.div);
+		else if (s.hasNext(DIVPAT)) { optype = Optype.div;
 			require(DIVPAT, "ParseOp no token for div ", s);}
 		else fail ("ParseOp unrecognised operator ", s);
-			require(OPENPAREN, "ParseOp missing open paren ", s);
-		leftNum = parseExpression(s);
-//		RobotProgramNode sen = parseSen(s);
-		System.out.println("352 ParseOp parse first exp  " + leftNum.toString());
+		require(OPENPAREN, "ParseOp missing open paren ", s);
+		RobotProgramNode leftExp = parseExpression(s);
+		System.out.println("368 ParseOp parse first exp  " + leftExp.toString());
 		require(",", "parseOp missing comma after first exp ", s);
-		rightNum = parseExpression(s);
-		System.out.println("355 ParseOp second expression " + rightNum.toString() );
+		RobotProgramNode rightExp = parseExpression(s);
+		System.out.println("371 ParseOp second expression " + rightExp.toString() );
 		require(CLOSEPAREN, "ParseOP missing close paren after exp2 ", s);
+		OpNode newOp = new OpNode(optype, leftExp, rightExp);
 // TODO how do I get the two numbers from each numNode and calculate the value for the OpNode
-//		newOp.calculate(leftNum, rightNum);
-		Optype thisOp = newOp.getOpType();
+//		newOp.calculate(leftExp., rightExp);
+//		Optype thisOp = newOp.calculate());
 		int result = newOp.result;
-		System.out.println("360 ParseOp result num 1= " + leftNum + " op= " + thisOp.toString() + " rightNum= " + rightNum + " result= " + result);
+		System.out.println("360 ParseOp result num 1= " + leftExp.toString() + " op= " + optype.toString() + " rightExp= " + rightExp.toString() + " result= " + result);
 		return newOp;
 	}
-	private static RobotProgramNode parseRelOp(Scanner s) {
+	private static RelOpNode parseRelOp(Scanner s) {
 		if (!s.hasNext()) { fail("Empty expression on parseRelop ", s); }
 		if (s.hasNext(CLOSEPAREN)) { fail("Empty braces on parseRelop ", s); }
 		System.out.println("ParseRelOp starts ");
 		//	RELOP ::= "lt" | "gt" | "eq"
 		RelOpNode relOp = new RelOpNode();
+		RelOpType relOpType = RelOpType.eq;
 		RobotProgramNode e1 = new ExpNode();
 		RobotProgramNode e2 = new ExpNode();
-		if (s.hasNext("lt")) { relOp.setRelOpType(RelOpType.lt); System.out.println("RelOp " + relOp.toString()); require("lt", "missing lt in lt ", s);}
-		else if (s.hasNext("gt")) { relOp.setRelOpType(RelOpType.gt); System.out.println("RelOp " + relOp.toString()); require("gt", "missing gt in lt ", s);}
-		else if (s.hasNext("eq")) { relOp.setRelOpType(RelOpType.eq); System.out.println("RelOp " + relOp.toString()); require("eq", "missing eq in lt ", s);}
-//		if (s.hasNext(OPENPAREN)) relOp.inSenValue = parseSen(s);
+		if (s.hasNext("lt")) { relOpType = RelOpType.lt; System.out.println("RelOp " + relOp.toString()); require("lt", "missing lt in lt ", s);}
+		else if (s.hasNext("gt")) { relOpType = RelOpType.gt; System.out.println("RelOp " + relOp.toString()); require("gt", "missing gt in lt ", s);}
+		else if (s.hasNext("eq")) { relOpType = RelOpType.eq; System.out.println("RelOp " + relOp.toString()); require("eq", "missing eq in lt ", s);}
+		relOp.relOpType = relOpType;
 		require(OPENPAREN, "no open paren on relOp", s);
 		if(s.hasNext(EXP_PAT)) {
 			e1 = parseExpression(s);
@@ -404,13 +407,13 @@ public class Parser {
 //			System.out.println("ParseSen result " + num.toString());
 //		}
 		else fail("383 no expression on first relOp num ", s);
-		require(",", "missing comma in reLop after first expression", s);
+		require(",", "missing comma in reLop after expression 1 left", s);
 		e2 = parseExpression(s);
 //		relOp.setNum(e1.getValue, e2,getValue, relOptype)
 //		boolean result = relOp.calcBool(relOp.getRelOpType(), e1.getNum, e2.getNum);
 //		relOp.setBool(result)
 		System.out.println("354 ParseExp result " + e2.toString() );
-		require(CLOSEPAREN, "missing close paren on relOP after Num ", s);
+		require(CLOSEPAREN, "missing close paren on relOP after expression 2 right ", s);
 		return relOp;
 		}
 
@@ -422,24 +425,12 @@ public class Parser {
 		if(s.hasNext(NUMPAT)){System.out.println("Exp returns Num ");  return parseNum(s);}
 		else if(s.hasNext(SEN_PAT)){System.out.println("Exp returns Sen ");  return parseSen(s);}
 		else if(s.hasNext(OP_PAT)){System.out.println("Exp returns Op ");  return parseOp(s);}
-		//		ExpNode expNode = new ExpNode();
-//		if(s.hasNext(NUMPAT)){expNode.setExpType(ExpType.num);System.out.println("Exp Num " + expNode.toString() + " result " + expNode.getResult());parseNum(s);}
-//		else if(s.hasNext(SEN_PAT)){expNode.setExpType(ExpType.sen);System.out.println("Exp Sen " + expNode.toString()+ " result " + expNode.getResult()); parseSen(s);}
-//		else if(s.hasNext(OP_PAT)){expNode.setExpType(ExpType.op);System.out.println("Exp op " + expNode.toString() +  " result " + expNode.getResult()); parseOp(s);}
-
-//		else if(s.hasNext(MULPAT)){System.out.println("Factor operator multiply " + expNode.toString()); return parseNum(s);}
-//		else if(s.hasNext(DIVPAT)){System.out.println("Factor operator divide " + expNode.toString()); return parseNum(s);}
-//		else if(s.hasNext(ADDPAT)|s.hasNext(SUBPAT)){System.out.println("Exp " + expNode.toString()); parseTerms(s);}
-//		else if(s.hasNext(MULPAT)| s.hasNext(DIVPAT) | s.hasNext(OPENPAREN)){System.out.println("Exp " + expNode.toString()); parseFactors(s);}
-//		else if(s.hasNext(OPENPAREN)){expNode.setExpType(ExpType.openParen); System.out.println("Factor infix add " + expNode.toString()); parseExpression(s);}
 		else fail("p374 parseExp Unrecognised expression ", s);
-//		value = Integer.parseInt(s.next());
 		return null;
 	}
 		private static RobotProgramNode parseNum (Scanner s){
 //			System.out.println("parseNum starts ");
 			if (!s.hasNext()) { fail("Empty expression", s); }
-//			if(!s.hasNext(NUMPAT)){fail ("expecting an integer", s);}
 			int value = requireInt(NUMPAT, "missing integer pattern ", s);
 			System.out.println("parseNum value: " + value);
 			return new NumNode(value);
