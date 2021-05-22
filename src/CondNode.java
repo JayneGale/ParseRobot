@@ -1,14 +1,23 @@
 public class CondNode implements RobotProgramNode{
 
+//    A condition node evaluates the whole expression so it needs 3 elements
+//    - the operator (initially gt lt or eq)
+//    and the integer values of the left and right expressions exp 1 and exp 2
+//    if the expression type is
+//    num, = the final number of a NumNode = int
+//    sen, = current sen reading (in execute) = int
+//    op = result of the operation (add, sub etc) = int
+//    ie exp always has to return an int
+
 public Boolean condBool;
 public RelOpType relOpType;
-
-public void setRelOpType(RelOpNode r) {
-        relOpType = r.relOpType;
-    }
-
 public int exp1 = 0;
 public int exp2 = 0;
+
+//public void setRelOpType(RelOpNode r) {
+//        relOpType = r.relOpType;
+//    }
+
 //public void setExp1(ExpNode e) {
 //        exp1 = e.getResult();
 //    }

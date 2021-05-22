@@ -333,8 +333,6 @@ public class Parser {
 		//			"barrelLR" [ "(" EXP ")" ] | "barrelFB" [ "(" EXP ")" ] | "wallDist"
 		if (s.hasNext(FUELLEFT)) { senType = SenType.fuelLeft;
 				require(FUELLEFT, "no token for fuelleft ", s);}
-//		else if (s.hasNext(OPP_LR)) { newSen.setSenType(SenType.oppLR);
-//			require(OPP_LR, "no token for OPP_LR ", s);}
 		else if (s.hasNext(OPP_LR)) { senType = SenType.oppLR;
 			require(OPP_LR, "no token for OPP_LR ", s);}
 		else if (s.hasNext(OPP_FB)) { senType = SenType.oppFB;
@@ -350,7 +348,7 @@ public class Parser {
 		else fail ("parseSen unknown or missing senType ", s);
 		newSen.senType = senType;
 		int value = newSen.result;
-		System.out.println("353 parseSen returns " + value);
+		System.out.println("351 parseSen returns " + value);
 		return senNode;
 	}
 
@@ -376,7 +374,7 @@ public class Parser {
 		require(CLOSEPAREN, "ParseOP missing close paren after exp2 ", s);
 		OpNode newOp = new OpNode(optype, leftExp, rightExp);
 // TODO how do I get the two numbers from each numNode and calculate the value for the OpNode
-//		newOp.calculate(leftExp., rightExp);
+//		newOp.calculate(leftExp, rightExp);
 //		Optype thisOp = newOp.calculate());
 		int result = newOp.result;
 		System.out.println("360 ParseOp result num 1= " + leftExp.toString() + " op= " + optype.toString() + " rightExp= " + rightExp.toString() + " result= " + result);
@@ -394,29 +392,25 @@ public class Parser {
 		else if (s.hasNext("eq")) { relOpType = RelOpType.eq; require("eq", "missing eq in lt ", s);}
 		relOp.relOpType = relOpType;
 		System.out.println("RelOp " + relOp.toString());
-		require(OPENPAREN, "no open paren on relOp", s);
-		RobotProgramNode e1 = new ExpNode();
-		RobotProgramNode e2 = new ExpNode();
+		require(OPENPAREN, "no open paren on parseReLop", s);
+		RobotProgramNode leftExp = new ExpNode();
+		RobotProgramNode rightExp = new ExpNode();
 		if(s.hasNext(EXP_PAT)) {
-			e1 = parseExpression(s);
+			leftExp = parseExpression(s);
 			System.out.println("401 ParseExp1 ");
 		}
 		else fail("383 no expression on first relOp num ", s);
-		require(",", "missing comma in reLop after expression 1 left", s);
+		require(",", "missing comma in parseReLop after expression 1 ", s);
 		if(s.hasNext(EXP_PAT)) {
-			e2 = parseExpression(s);
+			rightExp = parseExpression(s);
 			System.out.println("407 ParseExp2 ");
 		}
-		relOp.exp1 = e1;
-		relOp.exp2 = e2;
-//		relOp.setNum(e1.getValue, e2,getValue, relOptype)
-//		boolean result = relOp.calcBool(relOp.getRelOpType(), e1.getNum, e2.getNum);
+		relOp.exp1 = leftExp;
+		relOp.exp2 = rightExp;
+//		relOp.setNum(leftExp.getValue, rightExp,getValue, relOptype)
+//		boolean result = relOp.calcBool(relOp.getRelOpType(), leftExp.getNum, rightExp.getNum);
 //		relOp.setBool(result)
-		System.out.println("416 ParseExp result ");
-//		if(e1 != null && e2 != null){
-//			System.out.println("377 ParseExp" + e1.toString() + e2.toString());
-//		}
-		require(CLOSEPAREN, "missing close paren on relOP after expression 2 right ", s);
+		require(CLOSEPAREN, "missing close paren on parseReLop after expression 2  ", s);
 		return relOp;
 		}
 //		if(s.hasNext(SEN_PAT)){
@@ -429,47 +423,25 @@ public class Parser {
 //		}
 
 	private static RobotProgramNode parseExpression(Scanner s) {
-//	EXP   ::= NUM | SEN | VAR | OP "(" EXP "," EXP ")"
 		if (!s.hasNext()) { fail("empty string", s); }
 		System.out.println("parseExp started ");
+		ExpNode expNode = new ExpNode();
+		ExpType expType = ExpType.num;
 //		EXP   ::= NUM | SEN | OP "(" EXP "," EXP ")"
-		if(s.hasNext(NUMPAT)){System.out.println("Exp returns Num ");  return parseNum(s);}
-		else if(s.hasNext(SEN_PAT)){System.out.println("Exp returns Sen ");  return parseSen(s);}
-		else if(s.hasNext(OP_PAT)){System.out.println("Exp returns Op ");  return parseOp(s);}
-		else fail("p374 parseExp Unrecognised expression ", s);
-		return null;
+//	EXP   ::= NUM | SEN | VAR | OP "(" EXP "," EXP ")"
+		if(s.hasNext(NUMPAT)){System.out.println("Exp returns Num "); expNode.expType = ExpType.num; return parseNum(s);}
+		else if(s.hasNext(SEN_PAT)){System.out.println("Exp returns Sen "); expNode.expType = ExpType.sen; return parseSen(s);}
+		else if(s.hasNext(OP_PAT)){System.out.println("Exp returns Op "); expNode.expType = ExpType.op; return parseOp(s);}
+		else fail("p437 parseExp Unrecognised expression ", s);
+		return expNode;
 	}
 		private static RobotProgramNode parseNum (Scanner s){
-//			System.out.println("parseNum starts ");
+			System.out.println("parseNum starts ");
 			if (!s.hasNext()) { fail("Empty expression", s); }
 			int value = requireInt(NUMPAT, "missing integer pattern ", s);
 			System.out.println("parseNum value: " + value);
 			return new NumNode(value);
 		}
-
-//	private static RobotProgramNode parseTerms(Scanner s) {
-//		if (!s.hasNext()) { fail("Empty expression", s); }
-//		NumNode termNode = new NumNode();
-//		if(s.hasNext(ADDPAT)){System.out.println("Term operator add " + termNode.toString()); parseNum(s);}
-//		else if(s.hasNext(SUBPAT)){System.out.println("Term operator sub " + termNode.toString()); parseNum(s);}
-//		if(s.hasNext(MULPAT)){System.out.println("Factor operator multiply " + termNode.toString()); parseNum(s);}
-//		if(s.hasNext(DIVPAT)){System.out.println("Factor operator divide " + termNode.toString()); parseNum(s);}
-//		if(s.hasNext(OPENPAREN)){System.out.println("Factor infix add " + termNode.toString()); parseNum(s);}
-//		else fail("parseTerms Unrecognised expression ", s);
-//		return termNode;
-//	}
-//	private static RobotProgramNode parseFactors(Scanner s) {
-//		if (!s.hasNext()) { fail("Empty expression", s); }
-//		NumNode factorNode = new NumNode();
-//		if(s.hasNext(MULPAT)){System.out.println("Factor operator multiply " + factorNode.toString()); parseNum(s);}
-//		if(s.hasNext(DIVPAT)){System.out.println("Factor operator divide " + factorNode.toString()); parseNum(s);}
-//		if(s.hasNext(OPENPAREN)){System.out.println("Factor infix add " + factorNode.toString()); parseNum(s);}
-//		else fail("parseFactors Unrecognised expression ", s);
-//
-//		return factorNode;
-//	}
-
-// endregion
 
 	// ACTIONS are here
 //	region parse ACTIONS : MOVE TURNL TURNR TURNAR WAIT TAKEFUEL SHIELD
@@ -518,6 +490,15 @@ public class Parser {
 		require(SEMIC, "parseAct missing semicolon on: " + newMove.moveType, s);
 		return newMove;}
 
+	private static RobotProgramNode parseAssignVar(Scanner s) {
+//	ASSGN ::= VAR "=" EXP
+		return null;
+	}
+	private static RobotProgramNode parseVar(Scanner s) {
+//	VAR   ::= "\\$[A-Za-z][A-Za-z0-9]*"
+		return null;
+	}
+
 //	I replaced all the individual nodes with one MoveNode with enum states
 //	public static RobotProgramNode parseMove(Scanner s){
 //		MoveNode newMove = new MoveNode();
@@ -547,10 +528,29 @@ public class Parser {
 //	OP   ::= "add" | "sub"
 //	OP2   ::= "mul" | "div"
 
-	private static RobotProgramNode parseAssignVar(Scanner s) {
-//	ASSGN ::= VAR "=" EXP
-	 return null;
- }
+//	private static RobotProgramNode parseTerms(Scanner s) {
+//		if (!s.hasNext()) { fail("Empty expression", s); }
+//		NumNode termNode = new NumNode();
+//		if(s.hasNext(ADDPAT)){System.out.println("Term operator add " + termNode.toString()); parseNum(s);}
+//		else if(s.hasNext(SUBPAT)){System.out.println("Term operator sub " + termNode.toString()); parseNum(s);}
+//		if(s.hasNext(MULPAT)){System.out.println("Factor operator multiply " + termNode.toString()); parseNum(s);}
+//		if(s.hasNext(DIVPAT)){System.out.println("Factor operator divide " + termNode.toString()); parseNum(s);}
+//		if(s.hasNext(OPENPAREN)){System.out.println("Factor infix add " + termNode.toString()); parseNum(s);}
+//		else fail("parseTerms Unrecognised expression ", s);
+//		return termNode;
+//	}
+//	private static RobotProgramNode parseFactors(Scanner s) {
+//		if (!s.hasNext()) { fail("Empty expression", s); }
+//		NumNode factorNode = new NumNode();
+//		if(s.hasNext(MULPAT)){System.out.println("Factor operator multiply " + factorNode.toString()); parseNum(s);}
+//		if(s.hasNext(DIVPAT)){System.out.println("Factor operator divide " + factorNode.toString()); parseNum(s);}
+//		if(s.hasNext(OPENPAREN)){System.out.println("Factor infix add " + factorNode.toString()); parseNum(s);}
+//		else fail("parseFactors Unrecognised expression ", s);
+//
+//		return factorNode;
+//	}
+
+// endregion
 
 		//public Node parseExpr(Scanner s) {
 //	Node n;
@@ -563,10 +563,6 @@ public class Parser {
 //	return false;
 //}
 
-	private static RobotProgramNode parseVar(Scanner s) {
-//	VAR   ::= "\\$[A-Za-z][A-Za-z0-9]*"
-		return null;
-	}
 
 //public Node parseExpr(Scanner s) {
 //	Node n;

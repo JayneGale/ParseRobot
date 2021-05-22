@@ -14,8 +14,8 @@ public class SenNode implements RobotProgramNode {
         return result;
     }
 //    this is for getbarrelFB and LR which gets the distance to the nth barrel away
-//    just for this phase let's set it to 1
-    int n = 1;
+//    just for this phase let's set it to 2
+    int n = 2;
     public void setTargetBarrel(int input) {
         n = input;
     }

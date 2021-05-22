@@ -11,6 +11,12 @@ public class ExpNode implements RobotProgramNode {
     public ExpType getExpType () {
         return this.expType;
     }
+
+//        public void childType() {
+//        switch (expType) {
+//            case num:
+//                result = NumNode(); break;
+
 //    public int getResult() {
 //        switch (expType) {
 //            case num:
@@ -33,6 +39,10 @@ public class ExpNode implements RobotProgramNode {
 //    }
 
     public void execute(Robot robot) {
+//        switch (expType) {
+//            case num -> result = num;
+//            case sen -> result = result;
+//            case op -> result = value;
 //         TODO wtf do I put here
     }
     public String toString() {
