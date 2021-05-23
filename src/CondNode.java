@@ -1,5 +1,11 @@
 public class CondNode implements RobotProgramNode{
 
+//     condition nodes (Cond, LessThan, etc) are a different type from RobotProgramNode
+//     since they do not need an execute method, but
+//     instead need an
+//     - evaluate method which takes a robot as an argument and returns a boolean value.
+//     You will need to define an interface type for this category of node.
+
 //    A condition node evaluates the whole expression so it needs 3 elements
 //    - the operator (initially gt lt or eq)
 //    and the integer values of the left and right expressions exp 1 and exp 2
@@ -13,6 +19,7 @@ public Boolean condBool;
 public RelOpType relOpType;
 public int exp1 = 0;
 public int exp2 = 0;
+public Robot robot;
 
 //public void setRelOpType(RelOpNode r) {
 //        relOpType = r.relOpType;

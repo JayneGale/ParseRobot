@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public class ExpNode implements RobotProgramNode {
+public class ExpNode implements RobotValueNode {
     public ExpType expType;
 
 //    EXP   ::= NUM | SEN | OP "(" EXP "," EXP ")"
@@ -45,6 +45,17 @@ public class ExpNode implements RobotProgramNode {
 //            case op -> result = value;
 //         TODO wtf do I put here
     }
+
+    @Override
+    public Optype setOptype(Optype optype) {
+        return null;
+    }
+
+    @Override
+    public int eval(Robot robot) {
+        return 0;
+    }
+
     public String toString() {
         return "ExpNode expType " + expType;
     }

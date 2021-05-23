@@ -3,7 +3,7 @@ import java.util.ArrayList;
 public class WhileNode implements RobotProgramNode {
 
     CondNode cond;
-    RobotProgramNode block;
+    public BlockNode block;
 
     public String toString() {
         return "While node ";

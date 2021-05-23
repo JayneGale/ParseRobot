@@ -1,30 +1,28 @@
-public class OpNode implements RobotProgramNode {
+public class OpNode implements RobotValueNode {
 // Stage 2   OP    ::= "add" | "sub" | "mul" | "div"
 // Stage 4   OP    ::= "+" | "-" | "*" | "/"
 
-    Optype opType;
-    private RobotProgramNode leftNum, rightNum;
+    private Optype thisOpType;
+    private RobotValueNode leftNum, rightNum;
+    Robot robot;
 
-    public OpNode(Optype optype, RobotProgramNode lt, RobotProgramNode rt){
-        this.opType = optype;
+    public OpNode(Optype optype, RobotValueNode lt, RobotValueNode rt){
+        this.thisOpType = optype;
         leftNum = lt;
         rightNum = rt;
     }
-
-    int num1;
-    int num2;
+    int num1 = leftNum.eval(robot);
+    int num2 = rightNum.eval(robot);
     int result;
 
-    public void setOpType(Optype opType) {
-        this.opType = opType;
+    public Optype setOptype(Optype opType) {
+        thisOpType = opType;
+        return thisOpType;
     }
 
-    public Optype getOpType() {
-        return this.opType;
-    }
-
-    public int calculate(int num1, int num2) {
-        switch (opType) {
+    public int eval(Robot robot) {
+//    public int calculate(int num1, int num2) {
+        switch (thisOpType) {
             case add:
             case plus:
                 result = (num1 + num2);
@@ -50,7 +48,7 @@ public class OpNode implements RobotProgramNode {
     }
 
     public void execute(Robot robot) {
-        switch (opType) {
+        switch (thisOpType) {
             case add:
             case plus:
                 result = (num1 + num2);
@@ -79,7 +77,7 @@ public class OpNode implements RobotProgramNode {
     }
 
     public String toString() {
-        switch (opType) {
+        switch (thisOpType) {
             case add:
                 return leftNum + " add " + rightNum + " is " + result;
             case sub:

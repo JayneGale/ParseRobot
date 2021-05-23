@@ -1,11 +1,27 @@
-public class NumNode implements RobotProgramNode {
+public class NumNode implements RobotValueNode {
     private int number;
+
     public NumNode(int number){
-        this.number = number;
+        int thisNumber = number;
     }
-    public void execute(Robot robot){
-        System.out.println("set num to " + number);
+// from notes:
+//      class NumNode implements Node {
+//        private int value;
+//        public NumNode(int value) {
+//            this.value = value;
+//        }
+        //    public AddValueNode(RobotValueNode lt, RobotValueNode rt) {
+//        left = lt; right = rt;
+//    }
+
+    public Optype setOptype(Optype optype) {
+        return Optype.num;
     }
+
+    public int eval(Robot robot) {
+        return number;
+    }
+
     public String toString() {
         return "numNode number " + number;
     }

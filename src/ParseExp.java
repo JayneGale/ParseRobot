@@ -71,7 +71,7 @@ public class ParseExp {
 
         throw new RuntimeException(msg);
     }
-
+}
 //    public static RobotNode parseExpNode(Scanner s) {
 //        if (!s.hasNext()) 	{ fail("Empty expr",s); }
 //        RobotNode child = null;
@@ -84,13 +84,12 @@ public class ParseExp {
 //        return new ExprNode(child);
 //    }
 
-    public static RobotNode parseNum(Scanner s) {
-        if (!s.hasNextInt()) {
-            fail("not an integer", s);
-        }
-//        TODO up to here
-        return new NumNodeV(s.nextInt());
-    }
+//    public static RobotNode parseNum(Scanner s) {
+//        if (!s.hasNextInt()) {
+//            fail("not an integer", s);
+//        }
+//        return new NumNodeV(s.nextInt());
+//    }
 
     //    public Node parseNum(Scanner s){
 //        if (!s.hasNext("[-+]?\\d+")){
@@ -98,27 +97,5 @@ public class ParseExp {
 //        }
 //        return new NumNode(s.nextInt(t));
 //    }
-    public static RobotNode parseAdd(Scanner s) {
-
-        ArrayList<RobotNode> children = new ArrayList<RobotNode>();
-
-//        if (!s.hasNext("add")) { fail("no add", s); }
-//        children.add(new TerminalNode(s.next()));
-//
-//        if (!s.hasNext("\\(")) { fail("no (", s); }
-//        children.add(new TerminalNode(s.next()));
-//
-//        children.add(parseExpNode(s));
-//
-//        if (!s.hasNext(",")) { fail("no ,", s); }
-//        children.add(new TerminalNode(s.next()));
-//
-//        children.add(parseExpNode(s));
-//
-//        if (!s.hasNext("\\)")) { fail("no )", s); }
-//        children.add(new TerminalNode(s.next()));
-
-        return new AddNode(children);
 //    }
-    }
-}
+
