@@ -23,7 +23,6 @@ public class RelOpNode implements RobotValueNode {        //	defines the relevan
 //            case eq: relOpBool = (exp2 == exp1); break;
 //            default: System.out.println("relOpType not found "); break;
         }
-
 }
 
 //    //	create an enum with the different relative operations types

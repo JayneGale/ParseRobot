@@ -1,19 +1,16 @@
-public abstract class CondNode implements RobotValueNode {
+public class CondNode implements RobotValueNode {
 
 public Boolean condBool;
-public RelOpType relOpType;
+public Robot robot;
+
+RelOpType relOpType;
 RobotValueNode exp1Node;
 RobotValueNode exp2Node;
-public Robot robot;
 
 public int getExpVal(RobotValueNode e) {
         int exp = e.eval(robot);
         return exp;
     }
-//public void setExp2(ExpNode e) {
-//        exp2 = e.getResult();
-//    }
-
 public boolean evaluateCond(RelOpType reloptype, RobotValueNode exp1Node, RobotValueNode exp2Node){
         this.relOpType = reloptype;
         int exp1 = getExpVal(exp1Node);
@@ -41,6 +38,11 @@ public boolean evaluateCond(RelOpType reloptype, RobotValueNode exp1Node, RobotV
             return ("CondNode : boolResult " + condBool);
     }
 
+    @Override
+    public Optype setOptype(Optype optype) {
+        return null;
+    }
+
     public int eval(Robot robot){
     boolean condition = evaluateCond(relOpType, exp1Node, exp2Node);
     System.out.println("eval Cond " + relOpType + " exp1 " + exp1Node.toString() + " exp2 " + exp2Node.toString());
@@ -48,8 +50,6 @@ public boolean evaluateCond(RelOpType reloptype, RobotValueNode exp1Node, RobotV
     if(condition) result = 1; //true
     else result = 0;/*false*/
     return result;
-//    infinite loop
-        //		evaluate the CondNode elements to execute actually I need a different ActNode that is a RobotProgrammeNode
     }
 }
 
