@@ -28,6 +28,7 @@ public class MoveNode implements RobotProgramNode {
     }
 
     public void execute(Robot robot) {
+        System.out.println("moveNode type " + moveType.toString());
         switch (moveType) {
             case move: numMoves= getNumMoves();
                 if (numMoves > 0) { for (int i = 0; i < numMoves; i++) {
@@ -35,7 +36,7 @@ public class MoveNode implements RobotProgramNode {
                 } else {System.err.println("numMoves<=0"); }
                 break;
             case turnL: robot.turnLeft(); break;
-            case turnR:robot.turnRight();break;
+            case turnR: robot.turnRight(); break;
             case turnAround: robot.turnAround();break;
             case takeFuel: robot.takeFuel();break;
             case shieldOn: robot.setShield(true);break;

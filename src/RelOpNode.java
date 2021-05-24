@@ -7,9 +7,6 @@ public class RelOpNode implements RobotValueNode {        //	defines the relevan
     public Optype setOptype(Optype optype) {
         return null;
     }
-    public int eval() {
-        return 0;
-    }
     public String toString() {
         return switch (relOpType) {
             case lt -> " lt ";
@@ -19,7 +16,7 @@ public class RelOpNode implements RobotValueNode {        //	defines the relevan
         };
     }
         public int eval(Robot robot) {
-        return 0;
+        return 16;
 //        switch (relOpType) {
 //            case lt: relOpBool = (exp2 < exp1) ; break;
 //            case gt: relOpBool = (exp2 > exp1) ; break;

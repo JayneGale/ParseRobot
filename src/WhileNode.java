@@ -10,6 +10,7 @@ public class WhileNode implements RobotProgramNode {
     }
 
     public void execute(Robot robot) {
+        cond.execute(robot);
         while(cond.condBool){
             if(block != null) {
                 block.execute(robot);

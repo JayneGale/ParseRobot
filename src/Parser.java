@@ -320,7 +320,7 @@ public class Parser {
 //		COND  ::= RELOP "(" EXP "," EXP ")"  | and ( COND, COND ) | or ( COND, COND )  | not ( COND )
 //		RELOP ::= "lt" | "gt" | "eq"
 // TODO remove the reLopNode and replace with cond.relOpType
-		condNode.condBool = condNode.evaluateCond(relop.relOpType, condNode.exp1, condNode.exp2);
+		condNode.condBool = condNode.evaluateCond(relop.relOpType, condNode.exp1Node, condNode.exp1Node);
 		require(CLOSEPAREN, "298 no close paren on Cond ", s);
 		return condNode;
 	}
