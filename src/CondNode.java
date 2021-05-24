@@ -1,57 +1,54 @@
 public class CondNode implements RobotValueNode {
-
-public Boolean condBool;
-public Robot robot;
+//      Stage 1    COND  ::= RELOP "(" SEN "," NUM ")"
+//      Stage 2 generalise to  RELOP "(" EXP "," EXP ")"
 
 RelOpType relOpType;
 RobotValueNode exp1Node;
 RobotValueNode exp2Node;
 
-public int getExpVal(RobotValueNode e) {
-        int exp = e.eval(robot);
-        return exp;
-    }
-public boolean evaluateCond(RelOpType reloptype, RobotValueNode exp1Node, RobotValueNode exp2Node){
-        this.relOpType = reloptype;
-        int exp1 = getExpVal(exp1Node);
-        int exp2 = getExpVal(exp2Node);
-        boolean result = false;
-        switch (relOpType) {
-            case lt: result = (exp1 < exp2) ; break;
-            case gt: result = (exp1 > exp2) ; break;
-            case eq: result = (exp1 == exp2); break;
-            default: System.out.println("relOpType not found "); break;
-        }
+    public int eval(Robot robot){
+        boolean condition = evaluateCond(relOpType, exp1Node, exp2Node, robot);
+//       result: 0 = false 1 = true
+        int result = (condition) ? 1 : 0;
+        System.out.println("Cond eval: Is exp1 " + exp1Node.toString() + " " + relOpType + " exp2 " + exp2Node.toString() + " true? " + condition);
         return result;
     }
 
-//Stage 4    COND  ::= "and" "(" COND "," COND ")" | "or" "(" COND "," COND ")" | "not" "(" COND ")"  |
-//    RELOP "(" EXP "," EXP ")
-
-//Stage 2    COND  ::= RELOP "(" SEN "," NUM ")"
-//    Stage 2 implement RELOP "(" EXP "," EXP ")"
-
-    public Boolean getCondBool() {
-        return condBool;
+    public boolean evaluateCond(RelOpType relOpType, RobotValueNode exp1Node, RobotValueNode exp2Node, Robot robot){
+        int exp1 = getExpVal(exp1Node, robot);
+        int exp2 = getExpVal(exp2Node, robot);
+        boolean isTrue = false;
+        switch (relOpType) {
+            case lt: isTrue = (exp1 < exp2) ; break;
+            case gt: isTrue = (exp1 > exp2) ; break;
+            case eq: isTrue = (exp1 == exp2); break;
+            default: System.out.println("CondNode error: relOpType not found "); break;
+        }
+        return isTrue;
     }
+
+    public int getExpVal(RobotValueNode e, Robot robot) {
+        int exp = e.eval(robot);
+        return exp;
+    }
+
     public String toString() {
-            return ("CondNode : boolResult " + condBool);
+        return ("CondNode : isTrue? " +  relOpType + exp1Node.toString() + exp2Node.toString());
     }
 
-    @Override
     public Optype setOptype(Optype optype) {
         return null;
     }
 
-    public int eval(Robot robot){
-    boolean condition = evaluateCond(relOpType, exp1Node, exp2Node);
-    System.out.println("eval Cond " + relOpType + " exp1 " + exp1Node.toString() + " exp2 " + exp2Node.toString());
-    int result;
-    if(condition) result = 1; //true
-    else result = 0;/*false*/
-    return result;
-    }
 }
+
+//Stage 4    COND  ::= "and" "(" COND "," COND ")" | "or" "(" COND "," COND ")" | "not" "(" COND ")"  |
+//    RELOP "(" EXP "," EXP ")
+
+
+//    public Boolean getCondBool() {
+//        return condBool;
+//    }
 
 //     condition nodes (Cond, LessThan, etc) are a different type from RobotProgramNode
 //     since they do not need an execute method, but

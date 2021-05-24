@@ -1,18 +1,18 @@
-public class SenNode implements RobotProgramNode {
+public class SenNode implements RobotValueNode {
     //	calls the relevant Sensory methods in Robot
-
     //	an enum for the different sense types
-    public SenType senType;
-    public int result;
 
-    public void setNum(int result) {
-        this.result = result;
+    public SenNode(SenType senType){
+        this.senType = senType;
     }
+    SenType senType ;
+    int result;
 
-    public int getNum() {
-        this.result = result;
+    public int eval(Robot robot) {
+        execute(robot);
         return result;
     }
+
 //    this is for getbarrelFB and LR which gets the distance to the nth barrel away
 //    just for this phase let's set it to 2
     int n = 2;
@@ -22,6 +22,7 @@ public class SenNode implements RobotProgramNode {
     public int getTargetBarrel() {
         return n;
     }
+
     public void execute(Robot robot) {
         switch (senType) {
             case fuelLeft -> result = robot.getFuel();
@@ -33,9 +34,14 @@ public class SenNode implements RobotProgramNode {
             case wallDist -> result = robot.getDistanceToWall();
             default -> System.out.println("SenType not found ");
         }
-        setNum(result);
+//        result = eval(robot);
         System.out.println("SenNode: " + senType  + " = " + result);
     }
+
+    public Optype setOptype(Optype optype) {
+        return null;
+    }
+
     public String toString() {
         return switch (senType) {
             case fuelLeft -> "fuelLeft " + result;
@@ -48,11 +54,4 @@ public class SenNode implements RobotProgramNode {
             default -> ("senType enum not found ");
         };
     }
-
 }
-//    public void setSenType(SenType senType) {
-//        this.senType = senType;
-//    }
-//    public SenType getSenType() {
-//        return this.senType;
-//    }

@@ -1,8 +1,9 @@
-while(gt(fuelLeft, 0)){
-	if(eq(numBarrels, 0)){
-		wait;
+while(gt(numBarrels, 0)){
+		move;
+		turnL;
+		move;
 	}
-	if(gt(numBarrels, 0)){
+	if(lt(numBarrels, 2)){
 		if(eq(barrelFB, 0)){
 			if(eq(barrelLR, 0)){
 				takeFuel;
