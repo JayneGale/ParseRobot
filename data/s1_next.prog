@@ -1,16 +1,16 @@
-while(gt(numBarrels, 0)){
-		move;
-		turnL;
-		move;
-	}
-	if(lt(numBarrels, 2)){
-		if(eq(barrelFB, 0)){
-			if(eq(barrelLR, 0)){
-				takeFuel;
-			}
-		}
-		if(gt(barrelFB, 0)){ 
-			move; 
-		}
+if(gt(numBarrels, 0)){
+    move;
+    turnL;
+    move;
+    }
+while(lt(numBarrels, 6)){
+    if(eq(barrelFB, 0)){
+        if(eq(barrelLR, 0)){
+            takeFuel;
+        }
+    }
+if(gt(barrelFB, 0)){
+    move;
 	}
 }
+

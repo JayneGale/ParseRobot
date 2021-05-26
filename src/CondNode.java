@@ -28,8 +28,7 @@ RobotValueNode exp2Node;
     }
 
     public int getExpVal(RobotValueNode e, Robot robot) {
-        int exp = e.eval(robot);
-        return exp;
+        return e.eval(robot);
     }
 
     public String toString() {

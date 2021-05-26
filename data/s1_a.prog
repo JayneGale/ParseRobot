@@ -1,0 +1,21 @@
+turnL;
+shieldOff;
+while(gt(fuelLeft, 80)){
+    move;
+    shieldOn;
+    while(lt(numBarrels, 6)){
+        if(eq(barrelFB, 0)){
+            if(eq(barrelLR, 0)){
+                takeFuel;
+                shieldOff;
+            }
+        }
+    }
+	if(gt(numBarrels, 0)){
+        move;
+        shieldOff;
+        turnR;
+        move;
+        turnL;
+	}
+}

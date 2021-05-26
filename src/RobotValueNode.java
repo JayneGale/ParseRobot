@@ -33,9 +33,10 @@ class AddValueNode implements RobotValueNode {
         return result;
     }
     }
+
 class OpValueNode implements RobotValueNode {
-    private RobotValueNode left, right;
-    private Optype thisOptype = Optype.add;
+        RobotValueNode left, right;
+        Optype thisOptype = Optype.add;
 
     public OpValueNode(RobotValueNode lt, RobotValueNode rt) {
         left = lt;
@@ -47,31 +48,17 @@ class OpValueNode implements RobotValueNode {
         return thisOptype;
     }
 
-    ;
-
     public String toString() {
         return "add(" + left + "," + right + ")";
     }
 
     public int eval(Robot robot) {
         {
-            int result = 0;
-            result = left.eval(robot) + right.eval(robot);
-            return result;
+            return left.eval(robot) + right.eval(robot);
         }
     }
 }
 
-//    class AddNode implements RobotNode {
-//        final ArrayList<RobotNode> children;
-//        public AddNode(ArrayList<RobotNode> chn){
-//            children = chn; }
-//
-//    @Override
-//    public int eval() {
-//        return 0;
-//    }
-//
 //    public String toString() {
 //    //            copied from class notes
 //    //            String result = "[";

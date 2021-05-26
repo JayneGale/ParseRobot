@@ -88,23 +88,22 @@ public class Parser {
 
 	// Operator patterns
 //	Numbers: options Pattern.compile("-?\\d+"); // ("-?(0|[1-9][0-9]*)"); ( "[-+]?(\\d+([.]\\d*)?|[.]\\d+)"); // for robot game only need integers
-
 	private static final Pattern NUMPAT = Pattern.compile("-?[0-9]+");
 	private static final  Pattern ADDPAT = Pattern.compile("add");
 	private static final  Pattern SUBPAT = Pattern.compile("sub");
 	private static final  Pattern MULPAT = Pattern.compile("mul");
 	private static final  Pattern DIVPAT = Pattern.compile("div");
 
-	//	OP   ::= "add" | "sub" | "mul" | "div"
+	//	for Stage 2 OP ::= "add" | "sub" | "mul" | "div"
 	private static final Pattern OP_PAT = Pattern.compile("add|sub|mul|div");
-
 	//	RELOP ::= "lt" | "gt" | "eq"
 	private static final Pattern RELOP_PAT = Pattern.compile("lt|gt|eq");
+	// for Stage 4 VAR ::= "\\$[A-Za-z][A-Za-z0-9]*"
 	private static final  Pattern VAR_PAT = Pattern.compile("\\$[A-Za-z][A-Za-z0-9]*");
 
 	// Robot action patterns
-//	ACT   ::= "move" [ "(" EXP ")" ] | "turnL" | "turnR" | "turnAround" |
-//			"shieldOn" | "shieldOff" | "takeFuel" | "wait" [ "(" EXP ")" ]
+	//	ACT   ::= "move" [ "(" EXP ")" ] | "turnL" | "turnR" | "turnAround" |
+	//			"shieldOn" | "shieldOff" | "takeFuel" | "wait" [ "(" EXP ")" ]
 	private static final  Pattern MOVEPAT = Pattern.compile("move");
 	private static final  Pattern TURN_L = Pattern.compile("turnL");
 	private static final  Pattern TURN_R = Pattern.compile("turnR");
@@ -113,7 +112,6 @@ public class Parser {
 	private static final  Pattern TAKEFUEL = Pattern.compile("takeFuel");
 	private static final  Pattern SHIELDON = Pattern.compile("shieldOn");
 	private static final  Pattern SHIELDOFF = Pattern.compile("shieldOff");
-//	private static final  Pattern SHIELDGEN= Pattern.compile("shieldOn|shieldOff");
 
 	//  Sense patterns
 	private static final  Pattern FUELLEFT = Pattern.compile("fuelLeft");
@@ -123,7 +121,6 @@ public class Parser {
 	private static final  Pattern BARRELLR = Pattern.compile("barrelLR");
 	private static final  Pattern BARRELFB = Pattern.compile("barrelFB");
 	private static final  Pattern WALLDIST = Pattern.compile("wallDist");
-//	Todo add EXP option to barrelLR and barrelFB
 
 // Statement patterns
 	private static final  Pattern IF_PAT = Pattern.compile("if");
@@ -195,7 +192,6 @@ public class Parser {
 // parse STATEMENTS:
 //	region PARSE STATEMENTS: STMT IF WHILE LOOP BLOCK COND
 	static RobotProgramNode parseStatement (Scanner s){
-		ArrayList<RobotProgramNode> children =  new ArrayList<>();
 		if(!s.hasNext()) {fail("Empty expression", s);}
 		System.out.println("181 parseStatement started");
 
@@ -392,16 +388,13 @@ public class Parser {
 			require(DIVPAT, "ParseOp no token for div ", s);}
 		else fail ("ParseOp unrecognised operator ", s);
 		require(OPENPAREN, "ParseOp missing open paren ", s);
-
 		RobotValueNode leftExp = parseExpression(s);
-		System.out.println("368 ParseOp parse first exp  " + leftExp.toString());
+//		System.out.println("368 ParseOp parse first exp  " + leftExp.toString());
 		require(",", "parseOp missing comma after first exp ", s);
 		RobotValueNode rightExp = parseExpression(s);
-		System.out.println("371 ParseOp second expression " + rightExp.toString() );
+//		System.out.println("371 ParseOp second expression " + rightExp.toString() );
 		require(CLOSEPAREN, "ParseOP missing close paren after exp2 ", s);
-// TODO get the two numbers from each expression (Node) and calculate the value for the OpNode
 		OpNode newOp = new OpNode(optype, leftExp, rightExp);
-//		int result = newOp.result;
 		System.out.println("360 ParseOp result num 1= " + leftExp.toString() + " op= " + optype.toString() + " rightExp= " + rightExp.toString() + " result= " + newOp.result);
 		return newOp;
 	}
@@ -454,10 +447,12 @@ public class Parser {
 	// ACTIONS are here
 //	region parse ACTIONS : MOVE TURNL TURNR TURNAR WAIT TAKEFUEL SHIELD
 	static RobotProgramNode parseAct(Scanner s){
+
 		if(!s.hasNext()) {fail("Empty expression", s);}
 //		ACT   ::= "move" [ "(" EXP ")" ] | "turnL" | "turnR" | "turnAround" |
 //				"shieldOn" | "shieldOff" | "takeFuel" | "wait" [ "(" EXP ")" ]
 		// 		TODO currently move has no EXP option add restOfWait restOfMove EXP option to wait and move
+		//	I replaced all the individual nodes with one MoveNode with enum states
 		MoveNode newMove = new MoveNode();
 		if (s.hasNext(MOVEPAT)) {
 			newMove.setMoveType(ActionType.move);
@@ -506,29 +501,6 @@ public class Parser {
 //	VAR   ::= "\\$[A-Za-z][A-Za-z0-9]*"
 		return null;
 	}
-
-//	I replaced all the individual nodes with one MoveNode with enum states
-//	public static RobotProgramNode parseMove(Scanner s){
-//		MoveNode newMove = new MoveNode();
-//		newMove.setMoveType(ActionType.move);
-//		newMove.setNumMoves(1);
-//		if(!s.hasNext()) {fail("Empty expression", s);}
-//		System.out.println("303 Move started");
-//		require(MOVEPAT, "no move ", s);
-////		newMove.setMoveType(newMove.move);
-////		allow second type of move which holds an expression - move2
-////		restOfMove = "" | "//("
-//		int numMoves = 0;
-//		for (int i = 0;i < numMoves; i++)
-//			return newMove;
-////		else if(s.hasNext("\\(")){
-////		// find out if the term inside the brackets is valid and evaluate it
-////		require and element and a close bracket
-////			return move2(term);
-////		}
-//		require (SEMIC, "parseMove missing semicolon on move ", s);
-//		return newMove;
-//	}
 
 //	region parse ASSIGNVAR, VAR, EXPRESSION, SENSES, OPERATIONS, RELATIVE OPS, TERMS, FACTORS, NUMBER
 
@@ -660,11 +632,6 @@ public class Parser {
 		}
 	}
 }
-//NODE CLASSES
-
-//region TERMINAL ACTION NODES: MOVE TURN WAIT FUEL SHIELD
-
-
 //	example from Lectures of List with children
 //class AddNode implements Node {
 //	final ArrayList<Node> children;
@@ -674,18 +641,6 @@ public class Parser {
 //		String result = "[";
 //		for (Node n : children){result += n.toString();}
 //		return result + "]";
-
 //		execute(st.execute(robot));
 //		call the Programme elements to execute actually I need a an array or list of elements in the programme
 
-//endregion
-//		LOOP and BLOCK rules will need to construct the string out of their components.
-//	The execute method for LoopNode will not call methods on the robot directly, but will repeatedly call the execute method of the BlockNode that it contains. Similarly, the BlockNode will need to call the execute method of each of its components in turn.
-//		The node classes should also have a toString method which returns a textual representation of the node. The nodes corresponding to the PROG, STMT, LOOP and BLOCK rules will need to construct the string out of their components. For example, the LoopNode class might have the following method (assuming that block is a field containing the BlockNode that is contained in the LoopNode):
-//		1
-//public String toString() {
-//		2
-//		return "loop" + this.block;
-//		3
-//		}
-//		You will also need to create a parse... method for each of the rules, which takes the scanner, and returns a RobotProgramNod

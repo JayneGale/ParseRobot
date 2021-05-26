@@ -12,7 +12,7 @@ public class SenNode implements RobotValueNode {
         execute(robot);
         return result;
     }
-
+//	Todo add EXP option to barrelLR and barrelFB
 //    this is for getbarrelFB and LR which gets the distance to the nth barrel away
 //    just for this phase let's set it to 2
     int n = 2;
@@ -51,7 +51,6 @@ public class SenNode implements RobotValueNode {
             case barrelLR -> "barrelLR " + result;
             case barrelFB -> "barrelFB " + result;
             case wallDist -> "wallDist " + result;
-            default -> ("senType enum not found ");
         };
     }
 }

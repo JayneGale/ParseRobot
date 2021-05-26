@@ -1,7 +1,7 @@
 public class OpNode implements RobotValueNode {
 // Stage 2   OP    ::= "add" | "sub" | "mul" | "div"
 // Stage 4   OP    ::= "+" | "-" | "*" | "/"
-
+// TODO get the two numbers from each expression (Node) and calculate the value for the OpNode
     private Optype thisOpType;
     private RobotValueNode leftNum, rightNum;
     Robot robot;

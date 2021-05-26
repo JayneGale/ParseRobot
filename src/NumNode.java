@@ -1,4 +1,6 @@
 public class NumNode implements RobotValueNode {
+//Stage 2    NUM   ::= "-?[1-9][0-9]*|0"
+
     private int number;
 
     public NumNode(int number){
@@ -17,6 +19,5 @@ public class NumNode implements RobotValueNode {
         return "numNode number " + number;
     }
 }
-//    NUM   ::= "-?[1-9][0-9]*|0"
 
 

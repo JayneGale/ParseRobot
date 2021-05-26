@@ -12,11 +12,9 @@ public class BlockNode implements RobotProgramNode{
     //		call the BlockNode elements to execute
     public void execute(Robot robot) {
         if (blockList != null) {
-            while (true) {
                 for (RobotProgramNode b : blockList) {
                     b.execute(robot);
                 }
-            }
         }
     }
 }
