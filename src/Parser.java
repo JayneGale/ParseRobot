@@ -267,7 +267,7 @@ public class Parser {
 		newIf.cond = newCond;
 		newIf.block = newBl;
 		if (s.hasNext(ELSE_PAT)) {
-			require(ELSE_PAT, "mising ELSE ", s);
+			require(ELSE_PAT, "If missing ELSE ", s);
 			elseBl = parseBlock(s);
 		}
 		newIf.elseBlock = elseBl;
@@ -444,9 +444,6 @@ public class Parser {
 		else fail ("parseAct unknown or missing moveType ", s);
 		require(SEMIC, "parseAct missing semicolon on: " + newMove.moveType, s);
 		return newMove;}
-
-//	private static int parseParam(Scanner s) {
-//	}
 
 	private static RobotProgramNode parseAssignVar(Scanner s) {
 //	ASSGN ::= VAR "=" EXP
