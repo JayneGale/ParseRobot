@@ -3,7 +3,7 @@ public class CompoundCondNode implements RobotBoolNode {
     RobotBoolNode rightCond;
     LogicalOp logicalOp;
 //    Todo up to here
-    public CompoundCondNode( LogicalOp logicalOp, RobotBoolNode leftCond, RobotBoolNode rightCond;){
+    public CompoundCondNode( LogicalOp logicalOp, RobotBoolNode leftCond, RobotBoolNode rightCond){
         this.logicalOp = logicalOp;
         this.leftCond = leftCond;
         this.rightCond = rightCond;
@@ -13,7 +13,6 @@ public class CompoundCondNode implements RobotBoolNode {
         this.logicalOp = logicalop;
         return logicalop; }
 
-    @Override
     public boolean evalBool(Robot robot) {
         return evalSubConds(logicalOp, leftCond, rightCond, robot); }
 
@@ -28,22 +27,19 @@ public class CompoundCondNode implements RobotBoolNode {
     public boolean evalSubConds(LogicalOp logicalOp, RobotBoolNode leftCond, RobotBoolNode rightCond, Robot robot) {
         boolean result = false;
         boolean lt = leftCond.evalBool(robot);
-        boolean rt = rightCond.evalBool(robot);
-
         switch (logicalOp) {
             case and:
                 result = lt && rightCond.evalBool(robot);
-                System.out.println("add " + lt + rt);
+                System.out.println("add " + lt + rightCond.evalBool(robot));
             case or:
-                result = lt || rt;
-                System.out.println("or " + lt + rt);
-
+                result = lt || rightCond.evalBool(robot);
+                System.out.println("or " + lt + rightCond.evalBool(robot));
             case not:
                 result = !lt;
                 System.out.println("not" + lt);
-
             case relop:
                 result = lt;
         }
-        return result; }
+        return result;
+    }
 }

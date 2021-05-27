@@ -1,0 +1,9 @@
+while(
+and(
+gt(fuelLeft,30),lt(numBarrels, 0)
+)
+)
+{
+move;
+}
+

@@ -165,12 +165,14 @@ public class Parser {
 //		 robot action (move turn_l etc)
 
 // 	Not done yet
-//		 variable (var)
+//		term or factor or (infix brackets)
+//		variable (var)
 
-//	Not needed at Program level
+
+//		done
+//		 number, sense
 //		 relative operation (gt, lt, equals)
 //		 operation (add (terms), multiply(factors), etc)
-//		 term factor or number
 
 		while (s.hasNext()) {
 			if (s.hasNext(ACT_PAT) || s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT) || s.hasNext(LOOP_PAT)
@@ -237,6 +239,7 @@ public class Parser {
 		if(s.hasNext(CLOSEBRACE)) { fail("nothing between the block braces ", s); }
 		ArrayList<RobotProgramNode> blockTree = new ArrayList<>();
 		BlockNode newBL = new BlockNode();
+		System.out.println("242 parseBlock started ");
 		while(s.hasNext(ACT_PAT) || s.hasNext(LOOP_PAT) || s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT))   {
 			RobotProgramNode b = parseStatement(s);
 			blockTree.add(b);
@@ -254,21 +257,25 @@ public class Parser {
 	}
 
 	private static RobotProgramNode parseIf(Scanner s) {
-		System.out.println("214 parseIf started ");
 		//Stage 2		IF    ::= "if" "(" COND ")" BLOCK [ "else" BLOCK ]
 		//Stage 4		IF    ::= "if" "(" COND ")" BLOCK [ "elif"  "(" COND ")"  BLOCK ]* [ "else" BLOCK ]
 		require(IF_PAT, "no if ", s);
+		System.out.println("ParseIf started");
 		IfNode newIf = new IfNode();
-		RobotBoolNode newCond = new CompoundCondNode();
+		RobotBoolNode newCond = null;
 		BlockNode newBl = new BlockNode();
 		BlockNode elseBl = new BlockNode();
-		if (s.hasNext(OPENPAREN)) { newCond = parseCompoundCond(s); }
-		else fail ("266 parseWhile no Cond following If ", s);
+		if (s.hasNext(OPENPAREN)) {
+			require(OPENPAREN, "try parseIf open paren itself", s);
+			newCond = parseCompoundCond(s); }
+		else fail ("266 parseIF no Cond following If ", s);
+		require(CLOSEPAREN, "try parseIF open paren itself", s);
 		if (s.hasNext(OPENBRACE)){ newBl = parseBlock(s); }
 		else fail ("parseIf no block following or unknown expression ", s);
 		newIf.cond = newCond;
 		newIf.block = newBl;
 		if (s.hasNext(ELSE_PAT)) {
+			System.out.println("ParseElse");
 			require(ELSE_PAT, "If missing ELSE ", s);
 			elseBl = parseBlock(s);
 		}
@@ -283,14 +290,17 @@ public class Parser {
 	}
 
 	private static WhileNode parseWhile(Scanner s) {
-		System.out.println("274 parseWhile started " + s.hasNext());
+		System.out.println("274 parseWhile started");
 		//		WHILE ::= "while" "(" COND ")" BLOCK (= {})
 		require(WHILE_PAT, "no while ", s);
 		WhileNode newWhile = new WhileNode();
-		RobotBoolNode newCond = new CompoundCondNode();
+		RobotBoolNode newCond = null;
 		BlockNode newBl = new BlockNode();
-		if (s.hasNext(OPENPAREN)) { newCond = parseCond(s); }
+		if (s.hasNext(OPENPAREN)) {
+			require(OPENPAREN, "try parseWhile open paren itself", s);
+			newCond = parseCompoundCond(s); }
 		else fail ("parseWhile no Cond following While ", s);
+		require(CLOSEPAREN, "try parseWhile closing itself", s);
 		if (s.hasNext(OPENBRACE)){ newBl = parseBlock(s); }
 		else fail ("parseWhile no block following or unknown expression ", s);
 		newWhile.cond = newCond;
@@ -299,53 +309,45 @@ public class Parser {
 		return newWhile;
 	}
 	private static RobotBoolNode parseCompoundCond(Scanner s) {
-		System.out.println("CompoundCond started " + s.hasNext());
-		require(OPENPAREN, "no open bracket on CompoundCond ", s);
+		System.out.println("CompoundCond started");
+//		require(OPENPAREN, "no open bracket on CompoundCond ", s);
+		if (s.hasNext(CLOSEPAREN)) { fail("no condition between CompoundCond brackets ", s); }
 //		COND  ::= RELOP "(" EXP "," EXP ")"  | and ( COND, COND ) | or ( COND, COND )  | not ( COND )
 //		RELOP ::= "lt" | "gt" | "eq"
-
-//		RobotBoolNode compCond = new CompoundCondNode();
-		RobotBoolNode rightCond = null;
 		LogicalOp logOp = LogicalOp.relop;
-		require(OPENPAREN, "no open paren on CompoundCond ", s);
-		if (s.hasNext(CLOSEPAREN)) {
-			fail("no condition between CompoundCond brackets ", s);
+		RobotBoolNode rightCond = null;
+		RobotBoolNode leftCond = null;
+		if (s.hasNext(RELOP_PAT)) { logOp = LogicalOp.relop;
+			leftCond = parseCond(s);
+			return new CompoundCondNode(logOp, leftCond, rightCond);
 		}
-		if (s.hasNext("and || or")) {
-			if (s.hasNext("and")) {
-//				compCond.SetlogicalOpType(LogicalOp.and);
-				logOp = LogicalOp.and;
-				require("and", "no AND on complexCond ", s);
-			} else if (s.hasNext("or")) {
-//				compCond.SetlogicalOpType(LogicalOp.or);
-				logOp = LogicalOp.or;
-				require("or", "no OR on complexCond ", s);
+//		else if (s.hasNext(LOGIC_PAT)) {
+			if (s.hasNext("not")) {
+				require("not", "no NOT on complexCond ", s);
+				require(OPENPAREN, "no open paren on NOT CompoundCond ", s);
+				leftCond = parseCond(s);
+				require(CLOSEPAREN, "no close paren on NOT Cond ", s);
 			}
-			require(OPENPAREN, "no open paren on CompoundCond ", s);
-			rightCond = parseCompoundCond(s);
-			require(",", "no comma after complexCond rt ", s);
-		} else if (s.hasNext("not")) {
-//			compCond.SetlogicalOpType(LogicalOp.not);
-			logOp = LogicalOp.not;
-			require("not", "no NOT on complexCond ", s);
-			require(OPENPAREN, "no open paren on NOT CompoundCond ", s);
-		} else if (s.hasNext(RELOP_PAT)) {
-//				compCond.SetlogicalOpType(LogicalOp.relop);
-				logOp = LogicalOp.relop
+			else if (s.hasNext("and||or")) {
+				if (s.hasNext("and")) {
+					logOp = LogicalOp.and;
+					require("and", "no AND on complexCond ", s);
+				} else {
+					logOp = LogicalOp.or;
+					require("or", "no OR on complexCond ", s);
+				}
+				require(OPENPAREN, "no open paren on CompoundCond ", s);
+				leftCond = parseCond(s);
+				require(",", "no comma after complexCond rt ", s);
+				rightCond = parseCond(s);
+				require(CLOSEPAREN, "no close paren on right Cond ", s);
 			}
-			RobotBoolNode leftCond = parseCond(s);
-			require(CLOSEPAREN, "no close bracket on CompoundCond ", s);
-			CompoundCondNode compCond = new CompoundCondNode(logOp, leftCond, rightCond);
-//			Todo up to here - look at ParseOp to see what I need to do
-//		OpNode newOp = new OpNode(optype, leftExp, rightExp);
-
+		CompoundCondNode compCond = new CompoundCondNode(logOp, leftCond, rightCond);
 		return compCond;
 		}
 
-	private static CondNode parseCond(Scanner s) {
-		System.out.println("Cond started " + s.hasNext());
-//		require(OPENPAREN, "no open bracket on condition ", s);
-
+	private static RobotBoolNode parseCond(Scanner s) {
+		System.out.println("parseCond started");
 		CondNode condNode = new CondNode();
 		//		Stage 1 COND  ::= RELOP "(" SEN "," NUM ")
 		RelOpType relOpType = RelOpType.eq;
@@ -358,11 +360,34 @@ public class Parser {
 		condNode.exp1Node = parseExpression(s);
 		require(",", "Cond missing comma after first exp ", s);
 		condNode.exp2Node = parseExpression(s);
-		System.out.println("371 Cond second exp " + condNode.toString() );
-		require(CLOSEPAREN, "332 no close paren on relop(exp, exp) ", s);
-		require(CLOSEPAREN, "333 no close paren on Cond ", s);
+		System.out.println("356 Cond node " + condNode.toString() );
+		require(CLOSEPAREN, "357 no close paren on relop(exp, exp) ", s);
+//		require(CLOSEPAREN, "358 no close paren on Cond ", s);
 		return condNode;
 	}
+	private static RobotValueNode parseOp(Scanner s) {
+		System.out.println("ParseOp started");
+//	OP   ::= "add" | "sub" | "mul" | "div"
+		Optype optype = null;
+		if (s.hasNext(ADDPAT)) { optype = Optype.add;
+			require(ADDPAT, "ParseOp no token for add ", s);}
+		else if (s.hasNext(SUBPAT)) { optype = Optype.sub;
+			require(SUBPAT, "ParseOp no token for sub ", s);}
+		else if (s.hasNext(MULPAT)) { optype = Optype.mul;
+			require(MULPAT, "ParseOp no token for mul ", s);}
+		else if (s.hasNext(DIVPAT)) { optype = Optype.div;
+			require(DIVPAT, "ParseOp no token for div ", s);}
+		else fail ("ParseOp unrecognised operator ", s);
+		require(OPENPAREN, "ParseOp missing open paren ", s);
+		RobotValueNode leftExp = parseExpression(s);
+		require(",", "parseOp missing comma after first exp ", s);
+		RobotValueNode rightExp = parseExpression(s);
+		require(CLOSEPAREN, "ParseOP missing close paren after exp2 ", s);
+		OpNode newOp = new OpNode(optype, leftExp, rightExp);
+		System.out.println("360 ParseOp leftExp = " + leftExp.toString() + " op = " + optype.toString() + " rightExp = " + rightExp.toString());
+		return newOp;
+	}
+
 	private static RobotValueNode parseExpression(Scanner s) {
 		System.out.println("parseExp started ");
 //Stage 2	EXP   ::= NUM | SEN | OP "(" EXP "," EXP ")"
@@ -374,7 +399,7 @@ public class Parser {
 	}
 
 	private static RobotValueNode parseSen(Scanner s) {
-		System.out.println("Sen started ");
+		System.out.println("parseSen started ");
 		SenType senType = SenType.fuelLeft;
 		//	SEN   ::= "fuelLeft" | "oppLR" | "oppFB" | "numBarrels" |
 		//			"barrelLR" [ "(" EXP ")" ] | "barrelFB" [ "(" EXP ")" ] | "wallDist"
@@ -398,29 +423,6 @@ public class Parser {
 		return newSen;
 	}
 
-	private static RobotValueNode parseOp(Scanner s) {
-//	OP   ::= "add" | "sub" | "mul" | "div"
-		Optype optype = null;
-		if (s.hasNext(ADDPAT)) { optype = Optype.add;
-			require(ADDPAT, "ParseOp no token for add ", s);}
-		else if (s.hasNext(SUBPAT)) { optype = Optype.sub;
-			require(SUBPAT, "ParseOp no token for sub ", s);}
-		else if (s.hasNext(MULPAT)) { optype = Optype.mul;
-			require(MULPAT, "ParseOp no token for mul ", s);}
-		else if (s.hasNext(DIVPAT)) { optype = Optype.div;
-			require(DIVPAT, "ParseOp no token for div ", s);}
-		else fail ("ParseOp unrecognised operator ", s);
-		require(OPENPAREN, "ParseOp missing open paren ", s);
-		RobotValueNode leftExp = parseExpression(s);
-//		System.out.println("368 ParseOp parse first exp  " + leftExp.toString());
-		require(",", "parseOp missing comma after first exp ", s);
-		RobotValueNode rightExp = parseExpression(s);
-//		System.out.println("371 ParseOp second expression " + rightExp.toString() );
-		require(CLOSEPAREN, "ParseOP missing close paren after exp2 ", s);
-		OpNode newOp = new OpNode(optype, leftExp, rightExp);
-		System.out.println("360 ParseOp result num 1= " + leftExp.toString() + " op= " + optype.toString() + " rightExp= " + rightExp.toString());
-		return newOp;
-	}
 	private static RobotValueNode parseNum (Scanner s){
 		System.out.println("parseNum starts ");
 		NumNode numNode = new NumNode(0);
@@ -436,10 +438,11 @@ public class Parser {
 	// ACTIONS are here
 //	region parse ACTIONS : MOVE TURNL TURNR TURNAR WAIT TAKEFUEL SHIELD
 	static RobotProgramNode parseAct(Scanner s) {
-//		if (!s.hasNext(CLOSEPAREN)) { fail("Empty expression parseAct ", s);}
+		if (!s.hasNext()) { fail("Empty expression parseAct ", s);}
 		//	All the individual nodes use one generic MoveNode with enum states
 		//		ACT   ::= "move" [ "(" EXP ")" ] | "turnL" | "turnR" | "turnAround" |
 		//				"shieldOn" | "shieldOff" | "takeFuel" | "wait" [ "(" EXP ")" ]
+		System.out.println("ParseAct started");
 		MoveNode newMove = new MoveNode();
 		if (s.hasNext(MOVEPAT)) {
 			newMove.setMoveType(ActionType.move);

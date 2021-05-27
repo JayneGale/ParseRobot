@@ -45,7 +45,7 @@ public class CondNode implements RobotBoolNode {
     }
 
     public String toString() {
-        return ("CondNode : isTrue? " + relOpType + "" + exp1Node.toString() + " " + exp2Node.toString());
+        return ("CondNode : isTrue? " + exp1Node.toString() + " " + relOpType + " " + exp2Node.toString());
     }
 }
 
