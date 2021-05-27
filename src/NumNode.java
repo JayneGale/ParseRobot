@@ -1,7 +1,7 @@
 public class NumNode implements RobotValueNode {
 //Stage 2    NUM   ::= "-?[1-9][0-9]*|0"
 
-    private int number;
+    int number;
 
     public NumNode(int number){
         this.number = number;
@@ -17,6 +17,13 @@ public class NumNode implements RobotValueNode {
 
     public String toString() {
         return "numNode number " + number;
+    }
+
+    public int setNum(int value) {
+        number = value;
+        return value;
+    }
+    public void execute(Robot robot){ eval(robot);
     }
 }
 

@@ -1,0 +1,13 @@
+move(2);
+wait(36);
+while(gt(fuelLeft,25)){
+    move(2);
+    turnL;
+    wait(366);
+    move;
+    turnR;
+}
+if(lt(numBarrels, 10)){
+    turnL;
+    wait(36);
+}

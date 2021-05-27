@@ -338,15 +338,6 @@ public class Parser {
 		else fail("p437 parseExp Unrecognised expression ", s); return null;
 	}
 
-	private static RobotValueNode parseNum (Scanner s){
-		System.out.println("parseNum starts ");
-		if (!s.hasNext()) { fail("Empty expression", s); }
-		int value = requireInt(NUMPAT, "missing integer pattern ", s);
-		NumNode numNode = new NumNode(value);
-		numNode.setOptype(Optype.num);
-		System.out.println("parseNum value: " + value);
-		return numNode;
-	}
 
 	private static RobotValueNode parseSen(Scanner s) {
 		if(!s.hasNext()) {fail("Empty expression on parseSen ", s);}
@@ -398,57 +389,25 @@ public class Parser {
 		System.out.println("360 ParseOp result num 1= " + leftExp.toString() + " op= " + optype.toString() + " rightExp= " + rightExp.toString() + " result= " + newOp.result);
 		return newOp;
 	}
-//	private static RelOpNode parseRelOp(Scanner s) {
-//		if (!s.hasNext()) { fail("Empty expression on parseRelop ", s); }
-//		if (s.hasNext(CLOSEPAREN)) { fail("Empty braces on parseRelop ", s); }
-//		System.out.println("ParseRelOp starts ");
-//		//	RELOP ::= "lt" | "gt" | "eq"
-//		RelOpNode relOp = new RelOpNode();
-//		RelOpType relOpType = RelOpType.eq;
-//		if (s.hasNext("lt")) { relOpType = RelOpType.lt; require("lt", "missing lt in lt ", s);}
-//		else if (s.hasNext("gt")) { relOpType = RelOpType.gt; require("gt", "missing gt in lt ", s);}
-//		else if (s.hasNext("eq")) { relOpType = RelOpType.eq; require("eq", "missing eq in lt ", s);}
-//		relOp.relOpType = relOpType;
-//		System.out.println("RelOp " + relOp.toString());
-//		require(OPENPAREN, "no open paren on parseReLop", s);
-//		RobotValueNode leftExp = new ExpNode();
-//		RobotValueNode rightExp = new ExpNode();
-//		if(s.hasNext(EXP_PAT)) {
-//			leftExp = parseExpression(s);
-//			System.out.println("401 ParseExp1 ");
-//		}
-//		else fail("383 no expression on first relOp num ", s);
-//		require(",", "missing comma in parseReLop after expression 1 ", s);
-//		if(s.hasNext(EXP_PAT)) {
-//			rightExp = parseExpression(s);
-//			System.out.println("407 ParseExp2 ");
-//		}
 
-//		relOp.exp1 = leftExp.eval(Robot robot);
-//		relOp.exp2 = rightExp.eval(Robot robot);
-
-//		relOp.setNum(leftExp.getValue, rightExp,getValue, relOptype)
-//		boolean result = relOp.calcBool(relOp.getRelOpType(), leftExp.getNum, rightExp.getNum);
-//		relOp.setBool(result)
-//		require(CLOSEPAREN, "missing close paren on parseReLop after expression 2  ", s);
-//		return relOp;
-//		}
-
-//		if(s.hasNext(SEN_PAT)){
-//			RobotProgramNode sen = parseSen(s);
-//			System.out.println("ParseSen result " + sen.toString());
-//		}
-//		else if (s.hasNext(NUMPAT)) {
-//			RobotProgramNode num = parseNum(s);
-//			System.out.println("ParseSen result " + num.toString());
-//		}
+	private static RobotValueNode parseNum (Scanner s){
+		System.out.println("parseNum starts ");
+		NumNode numNode = new NumNode(0);
+//		if (!s.hasNext(CLOSEPAREN)) { fail("Empty expression", s); numNode.set.value(0); }
+		int value = requireInt(NUMPAT, "missing integer pattern ", s);
+		numNode.setOptype(Optype.num);
+		System.out.println("parseNum value: " + value);
+		numNode.setNum(value);
+		return numNode;
+	}
 
 
 	// ACTIONS are here
 //	region parse ACTIONS : MOVE TURNL TURNR TURNAR WAIT TAKEFUEL SHIELD
-	static RobotProgramNode parseAct(Scanner s){
-
-		if(!s.hasNext()) {fail("Empty expression", s);}
+	static RobotProgramNode parseAct(Scanner s) {
+		if (!s.hasNext()) {
+			fail("Empty expression", s);
+		}
 //		ACT   ::= "move" [ "(" EXP ")" ] | "turnL" | "turnR" | "turnAround" |
 //				"shieldOn" | "shieldOff" | "takeFuel" | "wait" [ "(" EXP ")" ]
 		// 		TODO currently move has no EXP option add restOfWait restOfMove EXP option to wait and move
@@ -456,9 +415,14 @@ public class Parser {
 		MoveNode newMove = new MoveNode();
 		if (s.hasNext(MOVEPAT)) {
 			newMove.setMoveType(ActionType.move);
-			newMove.setNumMoves(1);
-			require(MOVEPAT, "no move ", s);}
-//			return parseMove(s);}
+			require(MOVEPAT, "no move ", s);
+			if (s.hasNext(OPENPAREN)) {
+				require(OPENPAREN, "no open paren on move param ", s);
+				newMove.numMoves = parseExpression(s);
+				require(CLOSEPAREN, "NumMoves has no close paren", s);
+			}
+		}
+		//		"-?[1-9][0-9]*|0"
 		else if (s.hasNext(TURN_L)){
 			newMove.setMoveType(ActionType.turnL);
 			require(TURN_L, "no turnL ", s);
@@ -486,12 +450,19 @@ public class Parser {
 		}
 		else if (s.hasNext(WAIT)){
 			newMove.setMoveType(ActionType.wait);
-			newMove.setNumWaits(1);
 			require(WAIT, "no wait ", s);
+			if (s.hasNext(OPENPAREN)) {
+				require(OPENPAREN, "no open paren on numWaits ", s);
+				newMove.numWaits = parseExpression(s);
+				require(CLOSEPAREN, "numWaits has no close paren", s);
+			}
 		}
 		else fail ("parseAct unknown or missing moveType ", s);
 		require(SEMIC, "parseAct missing semicolon on: " + newMove.moveType, s);
 		return newMove;}
+
+//	private static int parseParam(Scanner s) {
+//	}
 
 	private static RobotProgramNode parseAssignVar(Scanner s) {
 //	ASSGN ::= VAR "=" EXP
