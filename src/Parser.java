@@ -357,7 +357,6 @@ public class Parser {
 
 	private static RobotValueNode parseOp(Scanner s) {
 //	OP   ::= "add" | "sub" | "mul" | "div"
-		if(!s.hasNext(CLOSEPAREN)) {fail("Empty expression on parseOp ", s);}
 		Optype optype = null;
 		if (s.hasNext(ADDPAT)) { optype = Optype.add;
 			require(ADDPAT, "ParseOp no token for add ", s);}
@@ -376,7 +375,7 @@ public class Parser {
 //		System.out.println("371 ParseOp second expression " + rightExp.toString() );
 		require(CLOSEPAREN, "ParseOP missing close paren after exp2 ", s);
 		OpNode newOp = new OpNode(optype, leftExp, rightExp);
-		System.out.println("360 ParseOp result num 1= " + leftExp.toString() + " op= " + optype.toString() + " rightExp= " + rightExp.toString() + " result= " + newOp.result);
+		System.out.println("360 ParseOp result num 1= " + leftExp.toString() + " op= " + optype.toString() + " rightExp= " + rightExp.toString());
 		return newOp;
 	}
 	private static RobotValueNode parseNum (Scanner s){

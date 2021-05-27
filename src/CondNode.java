@@ -38,7 +38,6 @@ RobotValueNode exp2Node;
     public Optype setOptype(Optype optype) {
         return null;
     }
-
 }
 
 //Stage 4    COND  ::= "and" "(" COND "," COND ")" | "or" "(" COND "," COND ")" | "not" "(" COND ")"  |

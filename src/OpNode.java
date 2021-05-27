@@ -1,28 +1,26 @@
 public class OpNode implements RobotValueNode {
 // Stage 2   OP    ::= "add" | "sub" | "mul" | "div"
 // Stage 4   OP    ::= "+" | "-" | "*" | "/"
-// TODO get the two numbers from each expression (Node) and calculate the value for the OpNode
-    private Optype thisOpType;
-    private RobotValueNode leftNum, rightNum;
-    Robot robot;
+
+    Optype opType;
+    RobotValueNode leftNode, rightNode;
 
     public OpNode(Optype optype, RobotValueNode lt, RobotValueNode rt){
-        this.thisOpType = optype;
-        leftNum = lt;
-        rightNum = rt;
+        this.opType = optype;
+        leftNode = lt;
+        rightNode = rt;
     }
-    int num1 = leftNum.eval(robot);
-    int num2 = rightNum.eval(robot);
-    int result;
 
     public Optype setOptype(Optype opType) {
-        thisOpType = opType;
-        return thisOpType;
+        opType = this.opType;
+        return opType;
     }
-
-    public int eval(Robot robot) {
-//    public int calculate(int num1, int num2) {
-        switch (thisOpType) {
+    public int evalOp(Optype opType, RobotValueNode leftNode, RobotValueNode rightNode, Robot robot){
+        int num1 = leftNode.eval(robot);
+        int num2 = rightNode.eval(robot);
+        int result;
+        System.out.println("Cond eval: Is exp1 " + leftNode.toString() + " " + rightNode + " exp2 " + rightNode.toString());
+        switch (opType) {
             case add:
             case plus:
                 result = (num1 + num2);
@@ -47,56 +45,33 @@ public class OpNode implements RobotValueNode {
         return result;
     }
 
-    public void execute(Robot robot) {
-        switch (thisOpType) {
-            case add:
-            case plus:
-                result = (num1 + num2);
-                break;
-            case sub:
-            case minus:
-                result = (num1 - num2);
-                break;
-            case mul:
-            case times:
-                result = (num1 * num2);
-                break;
-            case div:
-            case divide:
-                if(num2 == 0){System.err.println("zero divisor" + num2);
-                result = 0;
-                }
-                else{
-                    double num2d = num2;
-                    result = (int) Math.ceil(num1 / num2d);
-                } break;
-            default:
-                System.out.println("OpType not found ");
-                break;
-        }
+    public int eval(Robot robot) {
+        return evalOp(opType, leftNode, rightNode, robot);
     }
 
     public String toString() {
-        switch (thisOpType) {
+        String num1 = leftNode.toString();
+        String num2 = rightNode.toString();
+
+            switch (opType) {
             case add:
-                return leftNum + " add " + rightNum + " is " + result;
+                return num1 + " add " + num2;
             case sub:
-                return leftNum + " sub " + rightNum + " is " + result;
+                return num1 + " sub " + num2;
             case mul:
-                return leftNum + " mul " + rightNum + " is " + result;
+                return num1 + " mul " + num2;
             case div:
-                return leftNum + " div " + rightNum + " is " + result;
+                return num1 + " div " + num2;
             case plus:
-                return leftNum + " + " + rightNum + " is " + result;
+                return num1 + " + " + num2;
             case minus:
-                return leftNum + " - " + rightNum + " is " + result;
+                return num1 + " - " + num2;
             case times:
-                return leftNum + " * " + rightNum + " is " + result;
+                return num1 + " * " + num2;
             case divide:
-                return leftNum + " / " + rightNum + " is " + result;
+                return num1 + " / " + num2;
             default:
                 return ("OpType enum not found ");
         }
-
     }
 }

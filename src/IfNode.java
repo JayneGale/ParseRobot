@@ -10,6 +10,7 @@ public class IfNode implements RobotProgramNode {
         return "IfNode block " + block.toString() + " and condition is " + cond.toString();
     }
 //    result = 0 false and result 1 = true
+
     public void execute(Robot robot) {
         int result = cond.eval(robot);
         if (result < 0 || result > 1) {System.out.println("IfNode cond.eval not 0 or 1 " +  result); }

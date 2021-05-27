@@ -1,0 +1,22 @@
+while(gt(fuelLeft, add(90, 5))){
+	if(eq(sub(numBarrels,2), 0)){
+		shieldOn;
+	} else {
+		while(gt(fuelLeft, mul(numBarrels, 1))){
+			move;
+			turnL;
+        }
+    }
+    shieldOff;
+    if(eq(0, barrelFB)){
+        if(gt(sub(barrelLR, barrelFB), 0)){
+            turnL;
+        } else {
+            turnR;
+        }
+        if(gt(barrelFB, 0)){
+            move;
+        } else {
+            turnAround;
+    }
+}
