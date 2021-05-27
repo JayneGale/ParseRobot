@@ -2,7 +2,7 @@ public class IfNode implements RobotProgramNode {
     //    condition that returns a boolean from
     //    block RobotProgN
     //    elseBlock RobotProgNode
-    CondNode cond;
+    RobotBoolNode cond;
     BlockNode block;
     BlockNode elseBlock;
 

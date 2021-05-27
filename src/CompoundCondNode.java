@@ -2,6 +2,12 @@ public class CompoundCondNode implements RobotBoolNode {
     RobotBoolNode leftCond;
     RobotBoolNode rightCond;
     LogicalOp logicalOp;
+//    Todo up to here
+    public CompoundCondNode( LogicalOp logicalOp, RobotBoolNode leftCond, RobotBoolNode rightCond;){
+        this.logicalOp = logicalOp;
+        this.leftCond = leftCond;
+        this.rightCond = rightCond;
+    }
 
     public LogicalOp SetlogicalOpType(LogicalOp logicalop) {
         this.logicalOp = logicalop;

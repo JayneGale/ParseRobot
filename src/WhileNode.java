@@ -2,7 +2,7 @@ public class WhileNode implements RobotProgramNode {
 //    a Block RobotProgN and a
 //    Condition that returns a boolean
 
-    CondNode cond;
+    RobotBoolNode cond;
     BlockNode block;
 
     public String toString() {

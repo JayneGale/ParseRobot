@@ -259,7 +259,7 @@ public class Parser {
 		//Stage 4		IF    ::= "if" "(" COND ")" BLOCK [ "elif"  "(" COND ")"  BLOCK ]* [ "else" BLOCK ]
 		require(IF_PAT, "no if ", s);
 		IfNode newIf = new IfNode();
-		CondNode newCond = new CondNode();
+		RobotBoolNode newCond = new CompoundCondNode();
 		BlockNode newBl = new BlockNode();
 		BlockNode elseBl = new BlockNode();
 		if (s.hasNext(OPENPAREN)) { newCond = parseCompoundCond(s); }
@@ -287,7 +287,7 @@ public class Parser {
 		//		WHILE ::= "while" "(" COND ")" BLOCK (= {})
 		require(WHILE_PAT, "no while ", s);
 		WhileNode newWhile = new WhileNode();
-		CondNode newCond = new CondNode();
+		RobotBoolNode newCond = new CompoundCondNode();
 		BlockNode newBl = new BlockNode();
 		if (s.hasNext(OPENPAREN)) { newCond = parseCond(s); }
 		else fail ("parseWhile no Cond following While ", s);
@@ -298,35 +298,53 @@ public class Parser {
 		System.out.println("While blocksize" + newWhile.block.blockList.size());
 		return newWhile;
 	}
-	private static RobotBoolNode parseCompoundCond(Scanner s){
+	private static RobotBoolNode parseCompoundCond(Scanner s) {
 		System.out.println("CompoundCond started " + s.hasNext());
-		require(OPENPAREN, "no open bracket on condition ", s);
+		require(OPENPAREN, "no open bracket on CompoundCond ", s);
 //		COND  ::= RELOP "(" EXP "," EXP ")"  | and ( COND, COND ) | or ( COND, COND )  | not ( COND )
 //		RELOP ::= "lt" | "gt" | "eq"
 
-		CompoundCondNode compCond = new CompoundCondNode();
-		if(s.hasNext("and || or")) {
+//		RobotBoolNode compCond = new CompoundCondNode();
+		RobotBoolNode rightCond = null;
+		LogicalOp logOp = LogicalOp.relop;
+		require(OPENPAREN, "no open paren on CompoundCond ", s);
+		if (s.hasNext(CLOSEPAREN)) {
+			fail("no condition between CompoundCond brackets ", s);
+		}
+		if (s.hasNext("and || or")) {
 			if (s.hasNext("and")) {
-				compCond.SetlogicalOpType(LogicalOp.and);
+//				compCond.SetlogicalOpType(LogicalOp.and);
+				logOp = LogicalOp.and;
 				require("and", "no AND on complexCond ", s);
-			}
-			if (s.hasNext("or")) {
-				compCond.SetlogicalOpType(LogicalOp.or);
+			} else if (s.hasNext("or")) {
+//				compCond.SetlogicalOpType(LogicalOp.or);
+				logOp = LogicalOp.or;
 				require("or", "no OR on complexCond ", s);
 			}
-			if(s.hasNext(OPENPAREN)) compCond.leftCond = parseCond(s);
-//			TODO upto here
+			require(OPENPAREN, "no open paren on CompoundCond ", s);
+			rightCond = parseCompoundCond(s);
+			require(",", "no comma after complexCond rt ", s);
+		} else if (s.hasNext("not")) {
+//			compCond.SetlogicalOpType(LogicalOp.not);
+			logOp = LogicalOp.not;
+			require("not", "no NOT on complexCond ", s);
+			require(OPENPAREN, "no open paren on NOT CompoundCond ", s);
+		} else if (s.hasNext(RELOP_PAT)) {
+//				compCond.SetlogicalOpType(LogicalOp.relop);
+				logOp = LogicalOp.relop
+			}
+			RobotBoolNode leftCond = parseCond(s);
+			require(CLOSEPAREN, "no close bracket on CompoundCond ", s);
+			CompoundCondNode compCond = new CompoundCondNode(logOp, leftCond, rightCond);
+//			Todo up to here - look at ParseOp to see what I need to do
+//		OpNode newOp = new OpNode(optype, leftExp, rightExp);
+
+		return compCond;
 		}
-		if(s.hasNext(RELOP_PAT)) compCond.SetlogicalOpType(LogicalOp.relop);
-		if(s.hasNext("not")) compCond.SetlogicalOpType(LogicalOp.not);
-
-	}
-
 
 	private static CondNode parseCond(Scanner s) {
 		System.out.println("Cond started " + s.hasNext());
-		require(OPENPAREN, "no open bracket on condition ", s);
-		if(s.hasNext(CLOSEPAREN)) {fail("no condition between brackets ", s);}
+//		require(OPENPAREN, "no open bracket on condition ", s);
 
 		CondNode condNode = new CondNode();
 		//		Stage 1 COND  ::= RELOP "(" SEN "," NUM ")
