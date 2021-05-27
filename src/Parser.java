@@ -80,59 +80,59 @@ public class Parser {
 //region PATTERNS
 
 	// Symbols
-	private static final  Pattern OPENPAREN = Pattern.compile("\\(");
-	private static final  Pattern CLOSEPAREN = Pattern.compile("\\)");
-	private static final  Pattern OPENBRACE = Pattern.compile("\\{");
-	private static final  Pattern CLOSEBRACE = Pattern.compile("}");
+	private static final Pattern OPENPAREN = Pattern.compile("\\(");
+	private static final Pattern CLOSEPAREN = Pattern.compile("\\)");
+	private static final Pattern OPENBRACE = Pattern.compile("\\{");
+	private static final Pattern CLOSEBRACE = Pattern.compile("}");
 	private static final Pattern SEMIC =  Pattern.compile(";");
 
 	// Operator patterns
 //	Numbers: options Pattern.compile("-?\\d+"); // ("-?(0|[1-9][0-9]*)"); ( "[-+]?(\\d+([.]\\d*)?|[.]\\d+)"); // for robot game only need integers
-	private static final Pattern NUMPAT = Pattern.compile("-?[0-9]+");
-	private static final  Pattern ADDPAT = Pattern.compile("add");
-	private static final  Pattern SUBPAT = Pattern.compile("sub");
-	private static final  Pattern MULPAT = Pattern.compile("mul");
-	private static final  Pattern DIVPAT = Pattern.compile("div");
+	private static final Pattern NUMPAT = Pattern.compile("-?[1-9][0-9]*|0");
+	private static final Pattern ADDPAT = Pattern.compile("add");
+	private static final Pattern SUBPAT = Pattern.compile("sub");
+	private static final Pattern MULPAT = Pattern.compile("mul");
+	private static final Pattern DIVPAT = Pattern.compile("div");
 
 	//	for Stage 2 OP ::= "add" | "sub" | "mul" | "div"
 	private static final Pattern OP_PAT = Pattern.compile("add|sub|mul|div");
 	//	RELOP ::= "lt" | "gt" | "eq"
 	private static final Pattern RELOP_PAT = Pattern.compile("lt|gt|eq");
 	// for Stage 4 VAR ::= "\\$[A-Za-z][A-Za-z0-9]*"
-	private static final  Pattern VAR_PAT = Pattern.compile("\\$[A-Za-z][A-Za-z0-9]*");
+	private static final Pattern VAR_PAT = Pattern.compile("\\$[A-Za-z][A-Za-z0-9]*");
 
 	// Robot action patterns
 	//	ACT   ::= "move" [ "(" EXP ")" ] | "turnL" | "turnR" | "turnAround" |
 	//			"shieldOn" | "shieldOff" | "takeFuel" | "wait" [ "(" EXP ")" ]
-	private static final  Pattern MOVEPAT = Pattern.compile("move");
-	private static final  Pattern TURN_L = Pattern.compile("turnL");
-	private static final  Pattern TURN_R = Pattern.compile("turnR");
-	private static final  Pattern TURN_AR = Pattern.compile("turnAround");
-	private static final  Pattern WAIT = Pattern.compile("wait");
-	private static final  Pattern TAKEFUEL = Pattern.compile("takeFuel");
-	private static final  Pattern SHIELDON = Pattern.compile("shieldOn");
-	private static final  Pattern SHIELDOFF = Pattern.compile("shieldOff");
+	private static final Pattern MOVEPAT = Pattern.compile("move");
+	private static final Pattern TURN_L = Pattern.compile("turnL");
+	private static final Pattern TURN_R = Pattern.compile("turnR");
+	private static final Pattern TURN_AR = Pattern.compile("turnAround");
+	private static final Pattern WAIT = Pattern.compile("wait");
+	private static final Pattern TAKEFUEL = Pattern.compile("takeFuel");
+	private static final Pattern SHIELDON = Pattern.compile("shieldOn");
+	private static final Pattern SHIELDOFF = Pattern.compile("shieldOff");
 
 	//  Sense patterns
-	private static final  Pattern FUELLEFT = Pattern.compile("fuelLeft");
-	private static final  Pattern OPP_LR = Pattern.compile("oppLR");
-	private static final  Pattern OPP_FB = Pattern.compile("oppFB");
-	private static final  Pattern NUM_BARRELS = Pattern.compile("numBarrels");
-	private static final  Pattern BARRELLR = Pattern.compile("barrelLR");
-	private static final  Pattern BARRELFB = Pattern.compile("barrelFB");
-	private static final  Pattern WALLDIST = Pattern.compile("wallDist");
+	private static final Pattern FUELLEFT = Pattern.compile("fuelLeft");
+	private static final Pattern OPP_LR = Pattern.compile("oppLR");
+	private static final Pattern OPP_FB = Pattern.compile("oppFB");
+	private static final Pattern NUM_BARRELS = Pattern.compile("numBarrels");
+	private static final Pattern BARRELLR = Pattern.compile("barrelLR");
+	private static final Pattern BARRELFB = Pattern.compile("barrelFB");
+	private static final Pattern WALLDIST = Pattern.compile("wallDist");
 
 // Statement patterns
-	private static final  Pattern IF_PAT = Pattern.compile("if");
-	private static final  Pattern ELSE_PAT = Pattern.compile("else");
-	private static final  Pattern WHILE_PAT = Pattern.compile("while");
-	private static final  Pattern LOOP_PAT = Pattern.compile("loop");
+	private static final Pattern IF_PAT = Pattern.compile("if");
+	private static final Pattern ELSE_PAT = Pattern.compile("else");
+	private static final Pattern WHILE_PAT = Pattern.compile("while");
+	private static final Pattern LOOP_PAT = Pattern.compile("loop");
 
 
 // General
 	//	ACT   ::= "move" [ "(" EXP ")" ] | "turnL" | "turnR" | "turnAround" |
 	//			"shieldOn" | "shieldOff" | "takeFuel" | "wait" [ "(" EXP ")" ]
-	private static final  Pattern ACT_PAT = Pattern.compile("move|turnL|turnR|turnAround|wait|takeFuel|shieldOn|shieldOff");
+	private static final Pattern ACT_PAT = Pattern.compile("move|turnL|turnR|turnAround|wait|takeFuel|shieldOn|shieldOff");
 	private static final Pattern SEN_PAT = Pattern.compile("fuelLeft|oppLR|oppFB|numBarrels|barrelLR|barrelFB|wallDist");
 
 	//	EXP   ::= NUM | SEN | VAR | OP "(" EXP "," EXP ")"
@@ -148,7 +148,6 @@ public class Parser {
 	//	Todo Create any ASSIGN patterns when I get to Variables
 
 //  Pattern EXPR_PAT = Pattern.compile("/|\\*|-|\\+|-?\\d+");
-
 	//	endregion
 
 	/**
@@ -159,9 +158,10 @@ public class Parser {
 	static RobotProgramNode parseProgram(Scanner s) {
 		ArrayList<RobotProgramNode> nodeTree = new ArrayList<>();
 
-//		 scan for a
-//		 statement (action, loop, if, while )
-//		 action (move turn_l etc)
+//		 scans for a
+//		 statement (loop, if [else], while)
+//		 robot action (move turn_l etc)
+
 // 	Not done yet
 //		 variable (var)
 
@@ -192,9 +192,7 @@ public class Parser {
 // parse STATEMENTS:
 //	region PARSE STATEMENTS: STMT IF WHILE LOOP BLOCK COND
 	static RobotProgramNode parseStatement (Scanner s){
-		if(!s.hasNext()) {fail("Empty expression", s);}
 		System.out.println("181 parseStatement started");
-
 //		STMT  ::= ACT ";" | LOOP | IF | WHILE | ASSGN ";"
 		if (s.hasNext(ACT_PAT)) {
 			return parseAct(s);
@@ -216,17 +214,14 @@ public class Parser {
 //		While not )
 //		addtolist (Prog(s))
 //				Addtolist
-//	its now an end }
-//	when do I require the }
+//	its now an end } when do I require the }
 
-		if(!s.hasNext()) {fail("Empty expression on loop ", s);}
 		System.out.println("230 parseLoop started");
 		require(LOOP_PAT, "no loop ", s);
 //		LOOP  ::= "loop" BLOCK
 //		BlockNode block = new BlockNode();
 		if (s.hasNext(OPENBRACE)) {
 			return parseBlock(s);
-//			System.out.println("loop has b: " + b.toString());
 		}
 		return new LoopNode();
 //		While not )
@@ -235,11 +230,9 @@ public class Parser {
 //	its now an end }
 	}
 	private static BlockNode parseBlock(Scanner s) {
-		if(!s.hasNext()) {fail("Empty expression on block ", s);}
-//		System.out.println("Block started " + s.hasNext());
 //		BLOCK ::= "{" STMT+ "}"
 		require(OPENBRACE, "no open brace on block ", s);
-		if(s.hasNext(CLOSEBRACE)) {fail("nothing between the block braces ", s);}
+		if(s.hasNext(CLOSEBRACE)) { fail("nothing between the block braces ", s); }
 		ArrayList<RobotProgramNode> blockTree = new ArrayList<>();
 		BlockNode newBL = new BlockNode();
 		while(s.hasNext(ACT_PAT) || s.hasNext(LOOP_PAT) || s.hasNext(IF_PAT) || s.hasNext(WHILE_PAT))   {
@@ -259,24 +252,27 @@ public class Parser {
 	}
 
 	private static RobotProgramNode parseIf(Scanner s) {
-		if (!s.hasNext()) {	fail("Empty expression", s); }
 		System.out.println("214 parseIf started ");
-//Stage 2		IF    ::= "if" "(" COND ")" BLOCK [ "else" BLOCK ]
-//Stage 4		IF    ::= "if" "(" COND ")" BLOCK [ "elif"  "(" COND ")"  BLOCK ]* [ "else" BLOCK ]
+		//Stage 2		IF    ::= "if" "(" COND ")" BLOCK [ "else" BLOCK ]
+		//Stage 4		IF    ::= "if" "(" COND ")" BLOCK [ "elif"  "(" COND ")"  BLOCK ]* [ "else" BLOCK ]
 		require(IF_PAT, "no if ", s);
 		IfNode newIf = new IfNode();
 		CondNode newCond = new CondNode();
 		BlockNode newBl = new BlockNode();
-		if (s.hasNext(OPENPAREN)) {newCond = parseCond(s); }
+		BlockNode elseBl = new BlockNode();
+		if (s.hasNext(OPENPAREN)) { newCond = parseCond(s); }
 		else fail ("266 parseWhile no Cond following If ", s);
-		if (s.hasNext(OPENBRACE)){newBl = parseBlock(s); }
+		if (s.hasNext(OPENBRACE)){ newBl = parseBlock(s); }
 		else fail ("parseIf no block following or unknown expression ", s);
-		if(s.hasNext(ELSE_PAT)){
-			//		todo read up on restofif and create an else node/ parseElse
-		}
 		newIf.cond = newCond;
 		newIf.block = newBl;
+		if (s.hasNext(ELSE_PAT)) {
+			require(ELSE_PAT, "mising ELSE ", s);
+			elseBl = parseBlock(s);
+		}
+		newIf.elseBlock = elseBl;
 		System.out.println("If blocksize" + newIf.block.blockList.size());
+		System.out.println("If elseBlocksize" + newIf.elseBlock.blockList.size());
 		return newIf;
 	}
 
@@ -285,16 +281,15 @@ public class Parser {
 	}
 
 	private static WhileNode parseWhile(Scanner s) {
-		if (!s.hasNext()) {	fail("Empty expression", s); }
 		System.out.println("274 parseWhile started " + s.hasNext());
 		//		WHILE ::= "while" "(" COND ")" BLOCK (= {})
 		require(WHILE_PAT, "no while ", s);
 		WhileNode newWhile = new WhileNode();
 		CondNode newCond = new CondNode();
 		BlockNode newBl = new BlockNode();
-		if (s.hasNext(OPENPAREN)) { newCond = parseCond(s);}
+		if (s.hasNext(OPENPAREN)) { newCond = parseCond(s); }
 		else fail ("parseWhile no Cond following While ", s);
-		if (s.hasNext(OPENBRACE)){newBl = parseBlock(s); }
+		if (s.hasNext(OPENBRACE)){ newBl = parseBlock(s); }
 		else fail ("parseWhile no block following or unknown expression ", s);
 		newWhile.cond = newCond;
 		newWhile.block = newBl;
@@ -303,8 +298,6 @@ public class Parser {
 	}
 
 	private static CondNode parseCond(Scanner s) {
-//	    true or false RobotBool
-		if(!s.hasNext()) {fail("Empty expression on parsCond ", s);}
 		System.out.println("Cond started " + s.hasNext());
 		require(OPENPAREN, "no open bracket on condition ", s);
 		if(s.hasNext(CLOSEPAREN)) {fail("no condition between brackets ", s);}
@@ -328,7 +321,6 @@ public class Parser {
 		return condNode;
 	}
 	private static RobotValueNode parseExpression(Scanner s) {
-		if (!s.hasNext()) { fail("empty string", s); }
 		System.out.println("parseExp started ");
 //Stage 2	EXP   ::= NUM | SEN | OP "(" EXP "," EXP ")"
 //Stage 4	EXP   ::= NUM | SEN | VAR | OP "(" EXP "," EXP ")"
@@ -338,9 +330,7 @@ public class Parser {
 		else fail("p437 parseExp Unrecognised expression ", s); return null;
 	}
 
-
 	private static RobotValueNode parseSen(Scanner s) {
-		if(!s.hasNext()) {fail("Empty expression on parseSen ", s);}
 		System.out.println("Sen started ");
 		SenType senType = SenType.fuelLeft;
 		//	SEN   ::= "fuelLeft" | "oppLR" | "oppFB" | "numBarrels" |
@@ -367,7 +357,7 @@ public class Parser {
 
 	private static RobotValueNode parseOp(Scanner s) {
 //	OP   ::= "add" | "sub" | "mul" | "div"
-		if(!s.hasNext()) {fail("Empty expression on parseSen ", s);}
+		if(!s.hasNext(CLOSEPAREN)) {fail("Empty expression on parseOp ", s);}
 		Optype optype = null;
 		if (s.hasNext(ADDPAT)) { optype = Optype.add;
 			require(ADDPAT, "ParseOp no token for add ", s);}
@@ -389,29 +379,25 @@ public class Parser {
 		System.out.println("360 ParseOp result num 1= " + leftExp.toString() + " op= " + optype.toString() + " rightExp= " + rightExp.toString() + " result= " + newOp.result);
 		return newOp;
 	}
-
 	private static RobotValueNode parseNum (Scanner s){
 		System.out.println("parseNum starts ");
 		NumNode numNode = new NumNode(0);
-//		if (!s.hasNext(CLOSEPAREN)) { fail("Empty expression", s); numNode.set.value(0); }
-		int value = requireInt(NUMPAT, "missing integer pattern ", s);
+		int value = 0;
+		if (s.hasNext(CLOSEPAREN)) value = 0;
+		else value = requireInt(NUMPAT, "missing integer pattern ", s);
 		numNode.setOptype(Optype.num);
 		System.out.println("parseNum value: " + value);
 		numNode.setNum(value);
 		return numNode;
 	}
 
-
 	// ACTIONS are here
 //	region parse ACTIONS : MOVE TURNL TURNR TURNAR WAIT TAKEFUEL SHIELD
 	static RobotProgramNode parseAct(Scanner s) {
-		if (!s.hasNext()) {
-			fail("Empty expression", s);
-		}
-//		ACT   ::= "move" [ "(" EXP ")" ] | "turnL" | "turnR" | "turnAround" |
-//				"shieldOn" | "shieldOff" | "takeFuel" | "wait" [ "(" EXP ")" ]
-		// 		TODO currently move has no EXP option add restOfWait restOfMove EXP option to wait and move
-		//	I replaced all the individual nodes with one MoveNode with enum states
+//		if (!s.hasNext(CLOSEPAREN)) { fail("Empty expression parseAct ", s);}
+		//	All the individual nodes use one generic MoveNode with enum states
+		//		ACT   ::= "move" [ "(" EXP ")" ] | "turnL" | "turnR" | "turnAround" |
+		//				"shieldOn" | "shieldOff" | "takeFuel" | "wait" [ "(" EXP ")" ]
 		MoveNode newMove = new MoveNode();
 		if (s.hasNext(MOVEPAT)) {
 			newMove.setMoveType(ActionType.move);
@@ -422,7 +408,6 @@ public class Parser {
 				require(CLOSEPAREN, "NumMoves has no close paren", s);
 			}
 		}
-		//		"-?[1-9][0-9]*|0"
 		else if (s.hasNext(TURN_L)){
 			newMove.setMoveType(ActionType.turnL);
 			require(TURN_L, "no turnL ", s);

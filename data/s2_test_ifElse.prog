@@ -1,0 +1,16 @@
+while(gt(fuelLeft,30)) {
+move;
+if (gt(fuelLeft,70))
+    {
+        shieldOn;
+        move;
+    }
+else
+    {
+        turnAround;
+        shieldOff;
+        wait(3);
+        turnL;
+    }
+}
+
