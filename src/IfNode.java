@@ -1,9 +1,11 @@
 public class IfNode implements RobotProgramNode {
-//    a Block RobotProgN and a
+//    a Block RobotProgN and an elseBlock RobotProgNode
 //    Condition that returns a boolean
-
-    BlockNode block;
     CondNode cond;
+    BlockNode block;
+    BlockNode elseBlock;
+
+
 
     public String toString() {
         return "IfNode block " + block.toString() + " and condition is " + cond.toString();
@@ -15,6 +17,11 @@ public class IfNode implements RobotProgramNode {
         if(bool) {
             if (block != null) {
                 block.execute(robot);
+            }
+            else {
+                if (elseBlock != null) {
+                    elseBlock.execute(robot);
+                }
             }
         }
         System.out.println("IfNode condition " + cond.toString() + " cond.eval " +  result);
