@@ -142,6 +142,8 @@ public class Parser {
 	//	COND ::= RELOP "(" EXP "," EXP ")"  | and ( COND, COND ) | or ( COND, COND )  | not ( COND )
 	//	COND_PAT = RELOP plus (and, or, not)
 	private static final Pattern COND_PAT = Pattern.compile("lt|gt|eq|and|or|not");
+	private static final Pattern LOGIC_PAT = Pattern.compile("and|or|not");
+
 
 	//	ASSGN ::= VAR "=" EXP
 	//	ASSGN_PAT = Pattern.compile("\\$[A-Za-z][A-Za-z0-9]*");
@@ -260,7 +262,7 @@ public class Parser {
 		CondNode newCond = new CondNode();
 		BlockNode newBl = new BlockNode();
 		BlockNode elseBl = new BlockNode();
-		if (s.hasNext(OPENPAREN)) { newCond = parseCond(s); }
+		if (s.hasNext(OPENPAREN)) { newCond = parseCompoundCond(s); }
 		else fail ("266 parseWhile no Cond following If ", s);
 		if (s.hasNext(OPENBRACE)){ newBl = parseBlock(s); }
 		else fail ("parseIf no block following or unknown expression ", s);
@@ -296,15 +298,38 @@ public class Parser {
 		System.out.println("While blocksize" + newWhile.block.blockList.size());
 		return newWhile;
 	}
+	private static RobotBoolNode parseCompoundCond(Scanner s){
+		System.out.println("CompoundCond started " + s.hasNext());
+		require(OPENPAREN, "no open bracket on condition ", s);
+//		COND  ::= RELOP "(" EXP "," EXP ")"  | and ( COND, COND ) | or ( COND, COND )  | not ( COND )
+//		RELOP ::= "lt" | "gt" | "eq"
+
+		CompoundCondNode compCond = new CompoundCondNode();
+		if(s.hasNext("and || or")) {
+			if (s.hasNext("and")) {
+				compCond.SetlogicalOpType(LogicalOp.and);
+				require("and", "no AND on complexCond ", s);
+			}
+			if (s.hasNext("or")) {
+				compCond.SetlogicalOpType(LogicalOp.or);
+				require("or", "no OR on complexCond ", s);
+			}
+			if(s.hasNext(OPENPAREN)) compCond.leftCond = parseCond(s);
+//			TODO upto here
+		}
+		if(s.hasNext(RELOP_PAT)) compCond.SetlogicalOpType(LogicalOp.relop);
+		if(s.hasNext("not")) compCond.SetlogicalOpType(LogicalOp.not);
+
+	}
+
 
 	private static CondNode parseCond(Scanner s) {
 		System.out.println("Cond started " + s.hasNext());
 		require(OPENPAREN, "no open bracket on condition ", s);
 		if(s.hasNext(CLOSEPAREN)) {fail("no condition between brackets ", s);}
+
 		CondNode condNode = new CondNode();
 		//		Stage 1 COND  ::= RELOP "(" SEN "," NUM ")
-//		COND  ::= RELOP "(" EXP "," EXP ")"  | and ( COND, COND ) | or ( COND, COND )  | not ( COND )
-//		RELOP ::= "lt" | "gt" | "eq"
 		RelOpType relOpType = RelOpType.eq;
 		if (s.hasNext("lt")) { relOpType = RelOpType.lt; require("lt", "missing lt in lt ", s);}
 		else if (s.hasNext("gt")) { relOpType = RelOpType.gt; require("gt", "missing gt in lt ", s);}
