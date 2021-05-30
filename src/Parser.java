@@ -215,23 +215,21 @@ public class Parser {
 	}
 
 	private static RobotProgramNode parseLoop(Scanner s) {
+//		LOOP  ::= "loop" BLOCK
 //		While not )
 //		addtolist (Prog(s))
 //				Addtolist
-//	its now an end } when do I require the }
-
+//	its now an end }
+		LoopNode loopNode = new LoopNode();
+		BlockNode block = new BlockNode();
 		System.out.println("230 parseLoop started");
 		require(LOOP_PAT, "no loop ", s);
-//		LOOP  ::= "loop" BLOCK
-//		BlockNode block = new BlockNode();
-		if (s.hasNext(OPENBRACE)) {
-			return parseBlock(s);
-		}
-		return new LoopNode();
-//		While not )
-//		addtoBlock (Prog(s))
-//				Addtolist
-//	its now an end }
+//		if (s.hasNext(OPENBRACE)){ newBl = parseBlock(s); }
+
+		if (s.hasNext(OPENBRACE)) { block = parseBlock(s); }
+		else fail ("loop no block following or unknown expression ", s);
+		loopNode.block = block;
+		return loopNode;
 	}
 	private static BlockNode parseBlock(Scanner s) {
 //		BLOCK ::= "{" STMT+ "}"
